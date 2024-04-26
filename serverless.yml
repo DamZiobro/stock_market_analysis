@@ -2,7 +2,7 @@ service: stock-market-analysis
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.10
   region: eu-west-1
   iamRoleStatements:
     - Effect: "Allow"
@@ -13,14 +13,45 @@ provider:
 
 plugins:
   - serverless-step-functions
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: false  # Optional: only necessary if you need to build in an environment identical to AWS Lambda
+    usePoetry: true
+    slim: true
+    strip: true  # Optional: set to true to strip the .so files of debug information
+    layer: false  # Optional: if you want to package your dependencies as a Lambda layer
+
+package:
+  exclude:
+    - node_modules/**
+    - docs/**
+    - tests/**
+    - .venv/**
+    - .mypy_cache/**
+    - .pytest_cache/**
+    - .ruff_cache/**
+    - package-lock.json
+    - package.json
+    - poetry.lock
+    - pyproject.toml
+    - README.md
+    - serverless.yml
+    - mkdocs.yml
+    - .coverage
+    - .coveragerc
 
 functions:
   fetchData:
     handler: stock_market_analysis.steps.fetchData.handler
+    memorySize: 256
   trendAnalysis:
     handler: stock_market_analysis.steps.trendAnalysis.handler
+    memorySize: 256
   topPerformers:
     handler: stock_market_analysis.steps.topPerformers.handler
+    memorySize: 256
 
 stepFunctions:
   stateMachines:
@@ -33,12 +64,18 @@ stepFunctions:
           fetchData:
             Type: Task
             Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-fetchData
-            Next: trendAnalysis
-          trendAnalysis:
-            Type: Task
-            Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-trendAnalysis
-            Next: topPerformers
-          topPerformers:
-            Type: Task
-            Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-topPerformers
+            Next: processDataBatches
+          processDataBatches:
+            Type: Map
+            Iterator:
+              StartAt: trendAnalysis
+              States:
+                trendAnalysis:
+                  Type: Task
+                  Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-trendAnalysis
+                  Next: topPerformers
+                topPerformers:
+                  Type: Task
+                  Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-topPerformers
+                  End: true
             End: true

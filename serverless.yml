@@ -1,0 +1,44 @@
+service: stock-market-analysis
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: eu-west-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "lambda:InvokeFunction"
+        - "states:*"
+      Resource: "*"
+
+plugins:
+  - serverless-step-functions
+
+functions:
+  fetchData:
+    handler: stock_market_analysis.steps.fetchData.handler
+  trendAnalysis:
+    handler: stock_market_analysis.steps.trendAnalysis.handler
+  topPerformers:
+    handler: stock_market_analysis.steps.topPerformers.handler
+
+stepFunctions:
+  stateMachines:
+    stockMarketAnalysisWorkflow:
+      name: StockMarketAnalysisStateMachine
+      definition:
+        Comment: "A workflow to process stock market data from Yahoo Finance."
+        StartAt: fetchData
+        States:
+          fetchData:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-fetchData
+            Next: trendAnalysis
+          trendAnalysis:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-trendAnalysis
+            Next: topPerformers
+          topPerformers:
+            Type: Task
+            Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-topPerformers
+            End: true

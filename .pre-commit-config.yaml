@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: no-commit-to-branch
+        args:
+          - --pattern=develop|main|master
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+      - id: name-tests-test
+      - id: check-toml
+      - id: check-yaml
+      - id: check-symlinks
+      - id: check-merge-conflict
+  - repo: local
+    hooks:
+        - id: make-lint
+          name: make-lint
+          entry: make lint
+          language: system
+        - id: make-type-check
+          name: make-type-check
+          entry: make type-check
+          language: system
+        - id: make-unit-tests
+          name: make-unit-tests
+          entry: make unit-tests
+          language: system

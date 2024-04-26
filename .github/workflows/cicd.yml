@@ -1,0 +1,52 @@
+# This is a basic workflow to help you get started with Actions
+
+name: cli-command-CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request 
+# events but only for the master branch
+on:
+  push:
+    branches: 
+        - develop
+        - 'release/*'
+    tags: 
+        - v*
+  pull_request:
+    branches: 
+        - develop
+        - 'feature/*'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  pipeline:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    
+    - name: Installing dependencies
+      run: pip install poetry && make deps
+
+    - name: Linting
+      run: make lint
+
+    - name: Type checking
+      run: make type-check
+
+    - name: Code coverage
+      run: make cov
+
+    - name: Running the app (getting version)
+      run: OPTIONS="--version" make run
+
+    - name: Installing the app
+      run: make install
+
+    - name: Running installed version of app
+      run: cli-command --version

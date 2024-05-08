@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 
 import pandas as pd
 
-from stock_market_analysis.src.stock_data_fetcher import fetch_historical_data
+from stock_market_analysis.src.stock_data_fetcher import fetch_close_prices
 
 
 @patch("stock_market_analysis.src.stock_data_fetcher.Ticker")
@@ -20,7 +20,7 @@ def test_fetch_historical_data(mock_ticker: Mock):
     stock_symbol = "AAPL"
 
     # Call the function
-    result = fetch_historical_data(stock_symbol, days=expected_days)
+    result = fetch_close_prices(stock_symbol, days=expected_days)
 
     # Assertions to validate behavior
     assert isinstance(result, list), "The result should be a list"

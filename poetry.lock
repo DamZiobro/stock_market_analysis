@@ -104,7 +104,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "coverage"
-version = "7.5.0"
+version = "7.5.1"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -763,6 +763,17 @@ optional = false
 python-versions = ">=3.8"
 
 [[package]]
+name = "tabulate"
+version = "0.9.0"
+description = "Pretty-print tabular data"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+widechars = ["wcwidth"]
+
+[[package]]
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
@@ -777,6 +788,14 @@ description = "A lil' TOML parser"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
+
+[[package]]
+name = "types-tabulate"
+version = "0.9.0.20240106"
+description = "Typing stubs for tabulate"
+category = "main"
+optional = false
+python-versions = ">=3.8"
 
 [[package]]
 name = "typing-extensions"
@@ -855,7 +874,7 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "5bf5999bdcda5140502e6a49a753c61c6c603f7c31c132b890fb1bdd54d9fb53"
+content-hash = "e352f126b0af71bed815e8f1cb979697a99b543395ea0b6f702efc86495068aa"
 
 [metadata.files]
 annotated-types = []
@@ -921,8 +940,10 @@ requests = []
 ruff = []
 six = []
 soupsieve = []
+tabulate = []
 toml = []
 tomli = []
+types-tabulate = []
 typing-extensions = []
 tzdata = []
 urllib3 = []

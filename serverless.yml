@@ -52,8 +52,8 @@ functions:
   topPerformers:
     handler: stock_market_analysis.steps.topPerformers.handler
     memorySize: 256
-  historyDividendAnalysis:
-    handler: stock_market_analysis.steps.historyDividendAnalysis.handler
+  dividendCaptureAnalysis:
+    handler: stock_market_analysis.steps.dividendCaptureAnalysis.handler
     memorySize: 256
     timeout: 120
 
@@ -72,11 +72,11 @@ stepFunctions:
           processDataBatches:
             Type: Map
             Iterator:
-              StartAt: historyDividendAnalysis
+              StartAt: dividendCaptureAnalysis
               States:
-                historyDividendAnalysis:
+                dividendCaptureAnalysis:
                   Type: Task
-                  Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-historyDividendAnalysis
+                  Resource: arn:aws:lambda:eu-west-1:398024481618:function:stock-market-analysis-dev-dividendCaptureAnalysis
                   Next: trendAnalysis
                 trendAnalysis:
                   Type: Task

@@ -12,7 +12,7 @@ from stock_market_analysis.src.utils import log_dataframe_pretty
 HL_BUY_AND_SELL_COST = 2 * 11.95  # buy and sell fee in Heargraves and Landsdown
 
 
-def calculate_dividend_day_investment_returns(
+def calculate_dividend_capture_returns(
     df: pd.DataFrame, investment_amount: int = 10000, transactions_fees: float = 0.00
 ) -> pd.DataFrame:
     """Process a DataFrame that includes dividend data and share prices to calculate returns.
@@ -51,7 +51,7 @@ def calculate_dividend_day_investment_returns(
     return df
 
 
-def get_dividend_day_investment_return(
+def get_dividend_capture_return(
     ticker: str,
     investment_amount: int = 10000,
     limit: int = 10,
@@ -95,7 +95,7 @@ def get_dividend_day_investment_return(
         logger.info(f"Company '({ticker})' doesn't have dividend history.")
         return None
 
-    return calculate_dividend_day_investment_returns(
+    return calculate_dividend_capture_returns(
         dividends_df, investment_amount, transactions_fees=transactions_fees
     )
 
@@ -109,12 +109,12 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
 
     for item in event:
         ticker = item["Code"] + ".L"
-        returns_df = get_dividend_day_investment_return(ticker)
+        returns_df = get_dividend_capture_return(ticker)
         logger.info(f"Dividend profits of '({ticker})':")
         log_dataframe_pretty(returns_df)
 
     # dividends = fetch_historic_dividends(ticker, limit)
-    return {"statusCode": 200, "body": "Hello World from historyDividendAnalysis"}
+    return {"statusCode": 200, "body": "Hello World from dividendCaptureAnalysis"}
 
 
 if __name__ == "__main__":

@@ -13,8 +13,8 @@ from stock_market_analysis.src.stock_data_fetcher import (
     fetch_historic_dividends,
 )
 from stock_market_analysis.src.utils import log_dataframe_pretty
-from stock_market_analysis.steps.historyDividendAnalysis import (
-    get_dividend_day_investment_return,
+from stock_market_analysis.steps.dividendCaptureAnalysis import (
+    get_dividend_capture_return,
 )
 
 
@@ -123,7 +123,7 @@ def historic_dividends(ticker: str, limit: int = 10):
     default=0.00,
     help="Transaction fees for buying and selling",
 )
-def dividend_day_invest(
+def dividend_capture_analysis(
     ticker: str, investment_amount: int, limit: int, transactions_fees: float
 ):
     """Command-line tool to calculate the investment return for buying stock before ex-div date.
@@ -140,7 +140,7 @@ def dividend_day_invest(
     This tool fetches the dividend history for the given stock ticker and calculates the potential
     returns from investing a specified amount, considering transaction fees.
     """
-    returns_df = get_dividend_day_investment_return(
+    returns_df = get_dividend_capture_return(
         ticker=ticker,
         investment_amount=investment_amount,
         limit=limit,

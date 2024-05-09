@@ -12,6 +12,10 @@ from stock_market_analysis.src.stock_data_fetcher import (
     fetch_close_prices,
     fetch_historic_dividends,
 )
+from stock_market_analysis.src.utils import log_dataframe_pretty
+from stock_market_analysis.steps.historyDividendAnalysis import (
+    get_dividend_day_investment_return,
+)
 
 
 class HistoricalDataResponse(BaseModel):
@@ -103,6 +107,48 @@ def historic_dividends(ticker: str, limit: int = 10):
         click.echo(f"Dividends for {ticker}:\n{dividends}")
     else:
         click.echo(f"No dividend data available for {ticker}.")
+
+
+@stock_data.command()
+@click.option("--ticker", type=str, required=True, help="Stock ticker symbol")
+@click.option(
+    "--investment_amount", type=int, default=10000, help="Amount in GBP to be invested"
+)
+@click.option(
+    "--limit", type=int, default=10, help="Number of recent dividends to analyze"
+)
+@click.option(
+    "--transactions_fees",
+    type=float,
+    default=0.00,
+    help="Transaction fees for buying and selling",
+)
+def dividend_day_invest(
+    ticker: str, investment_amount: int, limit: int, transactions_fees: float
+):
+    """Command-line tool to calculate the investment return for buying stock before ex-div date.
+
+       and selling on the ex-dividend date.
+
+    Args:
+    ----
+        ticker (str): The stock ticker symbol.
+        investment_amount (int): The amount of money in GBP to invest.
+        limit (int): The maximum number of dividend records to process.
+        transactions_fees (float): The total transaction fees for buying and selling the stock.
+
+    This tool fetches the dividend history for the given stock ticker and calculates the potential
+    returns from investing a specified amount, considering transaction fees.
+    """
+    returns_df = get_dividend_day_investment_return(
+        ticker=ticker,
+        investment_amount=investment_amount,
+        limit=limit,
+        transactions_fees=transactions_fees,
+    )
+
+    if returns_df is not None:
+        log_dataframe_pretty(returns_df)
 
 
 @click.group()

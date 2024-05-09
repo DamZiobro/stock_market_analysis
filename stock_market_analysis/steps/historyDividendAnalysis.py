@@ -9,6 +9,9 @@ from stock_market_analysis.src.stock_data_fetcher import fetch_historic_dividend
 from stock_market_analysis.src.utils import log_dataframe_pretty
 
 
+HL_BUY_AND_SELL_COST = 2 * 11.95  # buy and sell fee in Heargraves and Landsdown
+
+
 def calculate_dividend_day_investment_returns(
     df: pd.DataFrame, investment_amount: int = 10000, transactions_fees: float = 0.00
 ) -> pd.DataFrame:
@@ -48,6 +51,55 @@ def calculate_dividend_day_investment_returns(
     return df
 
 
+def get_dividend_day_investment_return(
+    ticker: str,
+    investment_amount: int = 10000,
+    limit: int = 10,
+    transactions_fees: float = HL_BUY_AND_SELL_COST,
+):
+    """Calculate the return on investment for buying shares a day before the ex-dividend date.
+
+       and selling them on the ex-dividend date for a given stock ticker,
+       taking into account transaction fees.
+
+    Args:
+    ----
+        ticker (str): The stock symbol for which to calculate the dividend day investment returns.
+        investment_amount (int): The amount in GBP to be invested in buying the stock.
+                                 Default is 10,000 GBP.
+        limit (int): The maximum number of recent dividends to consider for the investment
+                     calculations. Default is 10.
+        transactions_fees (float): The total transaction fees for buying and selling the shares.
+                     Default is set to HL_BUY_AND_SELL_COST which must be predefined elsewhere.
+
+    Returns:
+    -------
+        pandas.DataFrame or None: Returns a DataFrame containing the calculated investment returns
+                                  for each dividend-paying date considered under the limit.
+                                  Returns None if the company has no dividend history or the
+                                  DataFrame cannot be generated.
+
+    Raises:
+    ------
+        Specific exceptions can be detailed here if there are any that could be specifically
+        expected, especially if they relate to external API calls, data fetching, and handling.
+
+    This function fetches historical dividend data, calculates potential investment returns based on
+    specified investment strategies, logs results using an information level logging, and finally
+    returns the resulting DataFrame. The log includes pretty printing of the DataFrame for
+    better readability in logs.
+    """
+    logger.info("Getting dividend day investment returns for company: '%s'", ticker)
+    dividends_df = fetch_historic_dividends(ticker, limit=limit)
+    if dividends_df is None:
+        logger.info(f"Company '({ticker})' doesn't have dividend history.")
+        return None
+
+    return calculate_dividend_day_investment_returns(
+        dividends_df, investment_amount, transactions_fees=transactions_fees
+    )
+
+
 def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     """Handle lambda requestes."""
     logger.info(
@@ -55,22 +107,10 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     )
     logger.info("event: %s", json.dumps(event))
 
-    HL_BUY_AND_SELL_COST = 2 * 11.95  # noqa: N806
-
     for item in event:
         ticker = item["Code"] + ".L"
-        company_name = item["Name"]
-        dividends_df = fetch_historic_dividends(ticker, limit=10)
-        if dividends_df is None:
-            logger.info(
-                f"Company '{company_name} ({ticker})' doesn't have dividend history."
-            )
-            continue
-
-        returns_df = calculate_dividend_day_investment_returns(
-            dividends_df, transactions_fees=HL_BUY_AND_SELL_COST
-        )
-        logger.info(f"Dividend profits of '{company_name} ({ticker})':")
+        returns_df = get_dividend_day_investment_return(ticker)
+        logger.info(f"Dividend profits of '({ticker})':")
         log_dataframe_pretty(returns_df)
 
     # dividends = fetch_historic_dividends(ticker, limit)

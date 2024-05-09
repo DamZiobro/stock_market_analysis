@@ -92,6 +92,7 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
     dividends = dividends.reset_index(name="Dividend").rename(
         columns={"Date": "Ex-Date"}
     )
+    dividends["Company code"] = str(ticker)
     dividends["Ex-Date"] = pd.to_datetime(dividends["Ex-Date"], utc=True)
     dividends["Day Before Ex-Date"] = dividends["Ex-Date"] - timedelta(days=1)
 

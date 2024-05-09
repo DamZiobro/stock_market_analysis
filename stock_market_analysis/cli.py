@@ -41,7 +41,7 @@ def version():
 
 
 @stock_data.command()
-@click.argument("stock_symbol", type=str)
+@click.option("--ticker", help="Stock ticker symbol, e.g., AAPL")
 @click.option(
     "--days",
     default=15,
@@ -49,12 +49,12 @@ def version():
     help="Number of days to fetch historical close prices for",
     type=int,
 )
-def close_prices(stock_symbol: str, days: int = 15):
+def close_prices(ticker: str, days: int = 15):
     """Fetch historical close prices for a given stock symbol over a specified number of days.
 
     Args:
     ----
-        stock_symbol (str): The stock ticker symbol for which historical data is fetched.
+        ticker (str): The stock ticker symbol for which historical data is fetched.
         days (Optional[int]): The number of days to fetch historical prices for. Defaults to 15.
 
     Returns:
@@ -65,9 +65,9 @@ def close_prices(stock_symbol: str, days: int = 15):
     ------
         Prints an error message if data fetching fails.
     """
-    prices = fetch_close_prices(stock_symbol, days=days)
+    prices = fetch_close_prices(ticker, days=days)
     data_response = HistoricalDataResponse(prices=prices)
-    click.echo(f"Historical Prices for {stock_symbol}: {data_response.prices}")
+    click.echo(f"Historical Prices for {ticker}: {data_response.prices}")
 
 
 @stock_data.command()

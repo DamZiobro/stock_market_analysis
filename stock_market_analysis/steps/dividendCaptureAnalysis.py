@@ -107,19 +107,21 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     )
     logger.info("event: %s", json.dumps(event))
 
+    all_returns_df = pd.DataFrame({})
     for item in event:
-        ticker = item["Code"] + ".L"
+        ticker = item["Code"]
         returns_df = get_dividend_capture_return(ticker)
         logger.info(f"Dividend profits of '({ticker})':")
-        log_dataframe_pretty(returns_df)
+        all_returns_df = pd.concat([all_returns_df, returns_df])
 
-    # dividends = fetch_historic_dividends(ticker, limit)
+    log_dataframe_pretty(all_returns_df)
     return {"statusCode": 200, "body": "Hello World from dividendCaptureAnalysis"}
 
 
 if __name__ == "__main__":
     event = [
-        {"Code": "ULVR", "Name": "Unilever"},
-        {"Code": "TEAM", "Name": "Team"},
+        {"Code": "ULVR.L", "Name": "Unilever"},
+        {"Code": "OCN.L", "Name": "Unilever"},
+        {"Code": "TEAM.L", "Name": "Team"},
     ]
     handler(event, {})

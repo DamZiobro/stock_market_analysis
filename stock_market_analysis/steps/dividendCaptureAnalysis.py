@@ -33,21 +33,21 @@ def calculate_dividend_capture_returns(
     2) The percentage of the profit from the investment.
     """
     # Ensure the DataFrame has the necessary columns
-    if "daybeforeprice" not in df.columns or "exdateprice" not in df.columns:
-        msg = "DataFrame must include 'daybeforeprice' and 'exdateprice' columns."
+    if "Day Before Price" not in df.columns or "Ex-Date Price" not in df.columns:
+        msg = "DataFrame must include 'Day Before Price' and 'Ex-Date Price' columns."
         raise ValueError(msg)
 
-    df["sharesbought"] = (investment_amount / df["daybeforeprice"]).apply(int)
-    df["buyingamount"] = df["sharesbought"] * df["daybeforeprice"]
-    df["sellingamount"] = df["sharesbought"] * df["exdateprice"]
-    df["dividendreceived"] = df["sharesbought"] * df["dividend"]
-    df["profitingbp"] = (
-        df["sellingamount"]
-        - df["buyingamount"]
-        + df["dividendreceived"]
+    df["Shares Bought"] = (investment_amount / df["Day Before Price"]).apply(int)
+    df["Buying Amount"] = df["Shares Bought"] * df["Day Before Price"]
+    df["Selling Amount"] = df["Shares Bought"] * df["Ex-Date Price"]
+    df["Dividend Received"] = df["Shares Bought"] * df["Dividend"]
+    df["Profit in GBP"] = (
+        df["Selling Amount"]
+        - df["Buying Amount"]
+        + df["Dividend Received"]
         - transactions_fees
     )
-    df["percentprofit"] = (df["profitingbp"] / df["buyingamount"]) * 100
+    df["Percent Profit"] = (df["Profit in GBP"] / df["Buying Amount"]) * 100
     return df
 
 

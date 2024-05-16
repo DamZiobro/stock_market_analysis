@@ -90,13 +90,13 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
         dividends = dividends.tail(limit)
 
     dividends = dividends.reset_index(name="Dividend").rename(
-        columns={"Date": "exdate", "Dividend": "dividend"}
+        columns={"Date": "Ex-Date"}
     )
-    dividends["companycode"] = str(ticker)
-    dividends["exdate"] = pd.to_datetime(dividends["exdate"], utc=True)
-    dividends["daybeforeexdate"] = dividends["exdate"] - timedelta(days=1)
+    dividends["Company code"] = str(ticker)
+    dividends["Ex-Date"] = pd.to_datetime(dividends["Ex-Date"], utc=True)
+    dividends["Day Before Ex-Date"] = dividends["Ex-Date"] - timedelta(days=1)
 
-    all_dates = dividends["exdate"].tolist() + dividends["daybeforeexdate"].tolist()
+    all_dates = dividends["Ex-Date"].tolist() + dividends["Day Before Ex-Date"].tolist()
     prices = stock.history(
         start=min(all_dates) - timedelta(days=30),
         end=max(all_dates) + timedelta(days=1),
@@ -118,23 +118,23 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
 
     # Check for availability of prices on required dates and keep only those entries
     dividends = dividends[
-        dividends["exdate"].isin(prices.index)
-        & dividends["daybeforeexdate"].isin(prices.index)
+        dividends["Ex-Date"].isin(prices.index)
+        & dividends["Day Before Ex-Date"].isin(prices.index)
     ]
 
     # Create sub-DataFrames for ex-date and day before, then merge them
-    ex_date_prices = prices.loc[dividends["exdate"], ["Close"]].rename(
-        columns={"Close": "exdateprice"}
+    ex_date_prices = prices.loc[dividends["Ex-Date"], ["Close"]].rename(
+        columns={"Close": "Ex-Date Price"}
     )
-    day_before_prices = prices.loc[dividends["daybeforeexdate"], ["Close"]].rename(
-        columns={"Close": "daybeforeprice"}
+    day_before_prices = prices.loc[dividends["Day Before Ex-Date"], ["Close"]].rename(
+        columns={"Close": "Day Before Price"}
     )
 
     dividends = dividends.merge(
-        ex_date_prices, left_on="exdate", right_index=True, how="left"
+        ex_date_prices, left_on="Ex-Date", right_index=True, how="left"
     )
     dividends = dividends.merge(
-        day_before_prices, left_on="daybeforeexdate", right_index=True, how="left"
+        day_before_prices, left_on="Day Before Ex-Date", right_index=True, how="left"
     )
 
-    return dividends.sort_values("exdate", ascending=False)
+    return dividends.sort_values("Ex-Date", ascending=False)

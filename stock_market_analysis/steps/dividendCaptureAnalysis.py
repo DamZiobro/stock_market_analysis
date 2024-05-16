@@ -6,7 +6,7 @@ import pandas as pd
 
 from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.stock_data_fetcher import fetch_historic_dividends
-from stock_market_analysis.src.utils import log_dataframe_pretty
+from stock_market_analysis.src.utils import log_dataframe_pretty, s3_save_pd_dataframe
 
 
 HL_BUY_AND_SELL_COST = 2 * 11.95  # buy and sell fee in Heargraves and Landsdown
@@ -33,21 +33,21 @@ def calculate_dividend_capture_returns(
     2) The percentage of the profit from the investment.
     """
     # Ensure the DataFrame has the necessary columns
-    if "Day Before Price" not in df.columns or "Ex-Date Price" not in df.columns:
-        msg = "DataFrame must include 'Day Before Price' and 'Ex-Date Price' columns."
+    if "daybeforeprice" not in df.columns or "exdateprice" not in df.columns:
+        msg = "DataFrame must include 'daybeforeprice' and 'exdateprice' columns."
         raise ValueError(msg)
 
-    df["Shares Bought"] = (investment_amount / df["Day Before Price"]).apply(int)
-    df["Buying Amount"] = df["Shares Bought"] * df["Day Before Price"]
-    df["Selling Amount"] = df["Shares Bought"] * df["Ex-Date Price"]
-    df["Dividend Received"] = df["Shares Bought"] * df["Dividend"]
-    df["Profit in GBP"] = (
-        df["Selling Amount"]
-        - df["Buying Amount"]
-        + df["Dividend Received"]
+    df["sharesbought"] = (investment_amount / df["daybeforeprice"]).apply(int)
+    df["buyingamount"] = df["sharesbought"] * df["daybeforeprice"]
+    df["sellingamount"] = df["sharesbought"] * df["exdateprice"]
+    df["dividendreceived"] = df["sharesbought"] * df["dividend"]
+    df["profitingbp"] = (
+        df["sellingamount"]
+        - df["buyingamount"]
+        + df["dividendreceived"]
         - transactions_fees
     )
-    df["Percent Profit"] = (df["Profit in GBP"] / df["Buying Amount"]) * 100
+    df["percentprofit"] = (df["profitingbp"] / df["buyingamount"]) * 100
     return df
 
 
@@ -107,15 +107,19 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     )
     logger.info("event: %s", json.dumps(event))
 
-    all_returns_df = pd.DataFrame({})
+    s3_bucket = "xmementoit-stock-market-analysis-asdfyuxc"
     for item in event:
         ticker = item["Code"]
+        s3_key = f"data/dividend_capture_analysis/{ticker}.parquet"
         returns_df = get_dividend_capture_return(ticker)
         logger.info(f"Dividend profits of '({ticker})':")
-        all_returns_df = pd.concat([all_returns_df, returns_df])
+        log_dataframe_pretty(returns_df)
+        s3_save_pd_dataframe(returns_df, s3_bucket, s3_key)
 
-    log_dataframe_pretty(all_returns_df)
-    return {"statusCode": 200, "body": "Hello World from dividendCaptureAnalysis"}
+    return {
+        "statusCode": 200,
+        "body": f"Successfully saved dividend_capture_analysis to S3 bucket {s3_bucket}",
+    }
 
 
 if __name__ == "__main__":

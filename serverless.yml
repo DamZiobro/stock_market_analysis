@@ -23,6 +23,13 @@ custom:
     strip: true  # Optional: set to true to strip the .so files of debug information
     layer: false  # Optional: if you want to package your dependencies as a Lambda layer
 
+resources:
+  Resources:
+    DataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: xmementoit-stock-market-analysis-asdfyuxc
+
 package:
   exclude:
     - node_modules/**
@@ -32,6 +39,7 @@ package:
     - .mypy_cache/**
     - .pytest_cache/**
     - .ruff_cache/**
+    - '**/tests/**'
     - package-lock.json
     - package.json
     - poetry.lock
@@ -54,7 +62,7 @@ functions:
     memorySize: 256
   dividendCaptureAnalysis:
     handler: stock_market_analysis.steps.dividendCaptureAnalysis.handler
-    memorySize: 256
+    memorySize: 1024
     timeout: 120
 
 stepFunctions:

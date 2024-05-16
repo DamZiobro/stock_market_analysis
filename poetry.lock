@@ -1,4 +1,60 @@
 [[package]]
+name = "aiobotocore"
+version = "2.12.3"
+description = "Async client for aws services using botocore and aiohttp"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+aiohttp = ">=3.7.4.post0,<4.0.0"
+aioitertools = ">=0.5.1,<1.0.0"
+botocore = ">=1.34.41,<1.34.70"
+wrapt = ">=1.10.10,<2.0.0"
+
+[package.extras]
+awscli = ["awscli (>=1.32.41,<1.32.70)"]
+boto3 = ["boto3 (>=1.34.41,<1.34.70)"]
+
+[[package]]
+name = "aiohttp"
+version = "3.9.5"
+description = "Async http client/server framework (asyncio)"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+aiosignal = ">=1.1.2"
+async-timeout = {version = ">=4.0,<5.0", markers = "python_version < \"3.11\""}
+attrs = ">=17.3.0"
+frozenlist = ">=1.1.1"
+multidict = ">=4.5,<7.0"
+yarl = ">=1.0,<2.0"
+
+[package.extras]
+speedups = ["brotlicffi", "brotli", "aiodns"]
+
+[[package]]
+name = "aioitertools"
+version = "0.11.0"
+description = "itertools and builtins for AsyncIO and mixed iterables"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "aiosignal"
+version = "1.3.1"
+description = "aiosignal: a list of registered asynchronous callbacks"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+frozenlist = ">=1.1.0"
+
+[[package]]
 name = "annotated-types"
 version = "0.6.0"
 description = "Reusable constraint types to use with typing.Annotated"
@@ -15,6 +71,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "async-timeout"
+version = "4.0.3"
+description = "Timeout context manager for asyncio programs"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "atomicwrites"
 version = "1.4.1"
 description = "Atomic file writes."
@@ -26,7 +90,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "attrs"
 version = "23.2.0"
 description = "Classes Without Boilerplate"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -66,6 +130,22 @@ chardet = ["chardet"]
 charset-normalizer = ["charset-normalizer"]
 html5lib = ["html5lib"]
 lxml = ["lxml"]
+
+[[package]]
+name = "botocore"
+version = "1.34.69"
+description = "Low-level, data-driven core of boto 3."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+jmespath = ">=0.7.1,<2.0.0"
+python-dateutil = ">=2.1,<3.0.0"
+urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >= \"3.10\""}
+
+[package.extras]
+crt = ["awscrt (==0.19.19)"]
 
 [[package]]
 name = "certifi"
@@ -151,6 +231,46 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "frozenlist"
+version = "1.4.1"
+description = "A list-like structure which implements collections.abc.MutableSequence"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "fsspec"
+version = "2024.3.1"
+description = "File-system specification"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.extras]
+abfs = ["adlfs"]
+adl = ["adlfs"]
+arrow = ["pyarrow (>=1)"]
+dask = ["dask", "distributed"]
+devel = ["pytest", "pytest-cov"]
+dropbox = ["dropboxdrivefs", "requests", "dropbox"]
+full = ["adlfs", "aiohttp (!=4.0.0a0,!=4.0.0a1)", "dask", "distributed", "dropbox", "dropboxdrivefs", "fusepy", "gcsfs", "libarchive-c", "ocifs", "panel", "paramiko", "pyarrow (>=1)", "pygit2", "requests", "s3fs", "smbprotocol", "tqdm"]
+fuse = ["fusepy"]
+gcs = ["gcsfs"]
+git = ["pygit2"]
+github = ["requests"]
+gs = ["gcsfs"]
+gui = ["panel"]
+hdfs = ["pyarrow (>=1)"]
+http = ["aiohttp (!=4.0.0a0,!=4.0.0a1)"]
+libarchive = ["libarchive-c"]
+oci = ["ocifs"]
+s3 = ["s3fs"]
+sftp = ["paramiko"]
+smb = ["smbprotocol"]
+ssh = ["paramiko"]
+tqdm = ["tqdm"]
+
+[[package]]
 name = "ghp-import"
 version = "2.1.0"
 description = "Copy your docs directly to the gh-pages branch."
@@ -222,6 +342,14 @@ MarkupSafe = ">=2.0"
 
 [package.extras]
 i18n = ["Babel (>=2.7)"]
+
+[[package]]
+name = "jmespath"
+version = "1.0.1"
+description = "JSON Matching Expressions"
+category = "main"
+optional = false
+python-versions = ">=3.7"
 
 [[package]]
 name = "lxml"
@@ -418,6 +546,14 @@ griffe = ">=0.37"
 mkdocstrings = ">=0.20"
 
 [[package]]
+name = "multidict"
+version = "6.0.5"
+description = "multidict implementation"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "multitasking"
 version = "0.0.11"
 description = "Non-blocking Python methods using decorators"
@@ -567,6 +703,17 @@ description = "library with cross-python path, ini-parsing, io, code, log facili
 category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+
+[[package]]
+name = "pyarrow"
+version = "16.0.0"
+description = "Python library for Apache Arrow"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+numpy = ">=1.16.6"
 
 [[package]]
 name = "pycodestyle"
@@ -747,6 +894,23 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "s3fs"
+version = "2024.3.1"
+description = "Convenient Filesystem interface over S3"
+category = "main"
+optional = false
+python-versions = ">= 3.8"
+
+[package.dependencies]
+aiobotocore = ">=2.5.4,<3.0.0"
+aiohttp = "<4.0.0a0 || >4.0.0a0,<4.0.0a1 || >4.0.0a1"
+fsspec = "2024.3.1"
+
+[package.extras]
+awscli = ["aiobotocore[awscli] (>=2.5.4,<3.0.0)"]
+boto3 = ["aiobotocore[boto3] (>=2.5.4,<3.0.0)"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -847,6 +1011,26 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "wrapt"
+version = "1.16.0"
+description = "Module for decorators, wrappers and monkey patching."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
+name = "yarl"
+version = "1.9.4"
+description = "Yet another URL library"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+idna = ">=2.0"
+multidict = ">=4.0"
+
+[[package]]
 name = "yfinance"
 version = "0.2.38"
 description = "Download market data from Yahoo! Finance API"
@@ -874,15 +1058,21 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "e352f126b0af71bed815e8f1cb979697a99b543395ea0b6f702efc86495068aa"
+content-hash = "6098d8cdfdb1a5f8c428eb6d86c55616836942835bf88cc99e0c79f123110f96"
 
 [metadata.files]
+aiobotocore = []
+aiohttp = []
+aioitertools = []
+aiosignal = []
 annotated-types = []
 appdirs = []
+async-timeout = []
 atomicwrites = []
 attrs = []
 babel = []
 beautifulsoup4 = []
+botocore = []
 certifi = []
 charset-normalizer = []
 click = []
@@ -891,12 +1081,15 @@ coverage = []
 flake8 = []
 flake8-mypy = []
 frozendict = []
+frozenlist = []
+fsspec = []
 ghp-import = []
 griffe = []
 html5lib = []
 idna = []
 iniconfig = []
 jinja2 = []
+jmespath = []
 lxml = []
 markdown = []
 markupsafe = []
@@ -911,6 +1104,7 @@ mkdocs-material-extensions = []
 mkdocs-swagger-ui-tag = []
 mkdocstrings = []
 mkdocstrings-python = []
+multidict = []
 multitasking = []
 mypy = []
 mypy-extensions = []
@@ -923,6 +1117,7 @@ peewee = []
 platformdirs = []
 pluggy = []
 py = []
+pyarrow = []
 pycodestyle = []
 pydantic = []
 pydantic-core = []
@@ -938,6 +1133,7 @@ pyyaml-env-tag = []
 regex = []
 requests = []
 ruff = []
+s3fs = []
 six = []
 soupsieve = []
 tabulate = []
@@ -949,4 +1145,6 @@ tzdata = []
 urllib3 = []
 watchdog = []
 webencodings = []
+wrapt = []
+yarl = []
 yfinance = []

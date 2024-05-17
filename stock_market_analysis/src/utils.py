@@ -22,4 +22,5 @@ def s3_save_pd_dataframe(df: pd.DataFrame, bucket: str, key: str):
         logger.warning(f"Skipping saving empty df into: {s3_path}")
         return
     logger.info(f"Saving pd.DataFrame into: {s3_path}")
-    df.to_parquet(s3_path, engine="auto", compression="snappy")
+    #df.to_parquet(s3_path, engine="fastparquet", compression="snappy")
+    df.to_csv(s3_path, index=False)

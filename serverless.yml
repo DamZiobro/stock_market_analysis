@@ -10,12 +10,21 @@ provider:
         - "lambda:InvokeFunction"
         - "states:*"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+        - "s3:ListBucket"
+      Resource:
+        - "arn:aws:s3:::${self:custom.bucketName}"
+        - "arn:aws:s3:::${self:custom.bucketName}/*"
 
 plugins:
   - serverless-step-functions
   - serverless-python-requirements
 
 custom:
+  bucketName: xmementoit-stock-market-analysis-asdfyuxc
   pythonRequirements:
     dockerizePip: false  # Optional: only necessary if you need to build in an environment identical to AWS Lambda
     usePoetry: true
@@ -28,7 +37,7 @@ resources:
     DataBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: xmementoit-stock-market-analysis-asdfyuxc
+        BucketName: ${self:custom.bucketName}
 
 package:
   exclude:
@@ -49,6 +58,7 @@ package:
     - mkdocs.yml
     - .coverage
     - .coveragerc
+    - .requirements.zip
 
 functions:
   fetchData:

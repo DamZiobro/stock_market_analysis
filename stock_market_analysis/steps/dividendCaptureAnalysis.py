@@ -110,7 +110,7 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     s3_bucket = "xmementoit-stock-market-analysis-asdfyuxc"
     for item in event:
         ticker = item["Code"]
-        s3_key = f"data/dividend_capture_analysis/{ticker}.parquet"
+        s3_key = f"data/dividend_capture_analysis/{ticker}.csv"
         returns_df = get_dividend_capture_return(ticker)
         logger.info(f"Dividend profits of '({ticker})':")
         log_dataframe_pretty(returns_df)

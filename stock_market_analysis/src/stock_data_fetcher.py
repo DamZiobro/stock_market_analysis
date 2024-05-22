@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
+import numpy as np
 import pandas as pd
 import yfinance as yf
 from yfinance import Ticker
@@ -85,51 +86,52 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
     if dividends.empty:
         return None
 
-    # If a limit is set, truncate the dividends DataFrame to that limit
     if limit is not None:
         dividends = dividends.tail(limit)
 
     dividends = dividends.reset_index(name="Dividend").rename(
         columns={"Date": "Ex-Date"}
     )
-    dividends["Company code"] = str(ticker)
-    dividends["Ex-Date"] = pd.to_datetime(dividends["Ex-Date"], utc=True)
-    dividends["Day Before Ex-Date"] = dividends["Ex-Date"] - timedelta(days=1)
+    dividends["Company code"] = ticker
+    dividends["Day Before Ex-Date"] = pd.to_datetime(dividends["Ex-Date"], utc=True)
+    dividends["Ex-Date"] = pd.to_datetime(
+        dividends["Ex-Date"], utc=True
+    ) + pd.Timedelta(days=1)
 
     all_dates = dividends["Ex-Date"].tolist() + dividends["Day Before Ex-Date"].tolist()
-    prices = stock.history(
-        start=min(all_dates) - timedelta(days=30),
+    prices = yf.download(
+        ticker,
+        start=min(all_dates) - timedelta(days=60),
         end=max(all_dates) + timedelta(days=1),
+        progress=False,
+    )
+    prices.index = (
+        prices.index.tz_localize("UTC")
+        if prices.index.tzinfo is None
+        else prices.index.tz_convert("UTC")
     )
 
-    if prices.index.tz is None:
-        prices.index = prices.index.tz_localize("UTC")
-    else:
-        prices.index = prices.index.tz_convert("UTC")
+    prices = prices.ffill()
 
-    prices = prices.reindex(
-        pd.date_range(
-            start=min(all_dates) - timedelta(days=30),
-            end=max(all_dates),
-            freq="D",
-            tz="UTC",
-        )
-    ).ffill()
-
-    # Check for availability of prices on required dates and keep only those entries
-    dividends = dividends[
-        dividends["Ex-Date"].isin(prices.index)
-        & dividends["Day Before Ex-Date"].isin(prices.index)
-    ]
-
-    # Create sub-DataFrames for ex-date and day before, then merge them
-    ex_date_prices = prices.loc[dividends["Ex-Date"], ["Close"]].rename(
-        columns={"Close": "Ex-Date Price"}
+    needed_dates = pd.date_range(
+        start=min(all_dates) - timedelta(days=1), end=max(all_dates), freq="D", tz="UTC"
     )
-    day_before_prices = prices.loc[dividends["Day Before Ex-Date"], ["Close"]].rename(
-        columns={"Close": "Day Before Price"}
-    )
+    prices = prices.reindex(needed_dates, method="ffill")
+    prices.index = prices.index.normalize()
 
+    # Normalize the dates to ensure compatibility
+    dividends["Ex-Date"] = dividends["Ex-Date"].dt.normalize()
+    dividends["Day Before Ex-Date"] = dividends["Day Before Ex-Date"].dt.normalize()
+
+    # Attempt to get the prices for the required dates and handle if they are not present
+    ex_date_prices = prices.loc[
+        prices.index.intersection(dividends["Ex-Date"]), ["Close"]
+    ].rename(columns={"Close": "Ex-Date Price"})
+    day_before_prices = prices.loc[
+        prices.index.intersection(dividends["Day Before Ex-Date"]), ["Close"]
+    ].rename(columns={"Close": "Day Before Price"})
+
+    # Only merge rows where price data exists
     dividends = dividends.merge(
         ex_date_prices, left_on="Ex-Date", right_index=True, how="left"
     )
@@ -137,4 +139,88 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
         day_before_prices, left_on="Day Before Ex-Date", right_index=True, how="left"
     )
 
+    # Filter out any rows that did not find matching price data
+    dividends = dividends.dropna(subset=["Ex-Date Price", "Day Before Price"])
+
+    # Filter out any rows that did not find matching price data
+    dividends = dividends.dropna(subset=["Ex-Date Price", "Day Before Price"])
+
     return dividends.sort_values("Ex-Date", ascending=False)
+
+
+def calculate_moving_average(data: pd.DataFrame, window: int) -> pd.DataFrame:
+    """Calculate the moving average and its slope for the provided data.
+
+    Args:
+    ----
+        data (pd.DataFrame): The data containing stock prices.
+        window (int): The window size for calculating the moving average.
+
+    Returns:
+    -------
+        pd.DataFrame: The input data enhanced with the moving average and its slope.
+    """
+    # Calculate the simple moving average (SMA)
+    data["SMA"] = data["Close"].rolling(window=window).mean()
+    # Calculate the slope of the moving average
+    data["SMA_slope"] = data["SMA"].diff() / window
+    return data
+
+
+def fetch_chart_trend(ticker: str, days: int = 90, window: int = 30):
+    """Get the stock price trend and its duration for the specified ticker over the last N days.
+
+    Args:
+    ----
+    - ticker (str): The ticker symbol of the stock (e.g., 'AAPL').
+    - days (int): Number of days to consider for the trend analysis.
+    - window (int): The window size for calculating the moving average.
+
+
+    Returns:
+    -------
+    - dict: Dictionary containing the trend direction ('up', 'down', 'flat') and duration in days.
+    """
+    # Fetch historical data from Yahoo Finance
+    end_date = datetime.now(timezone.utc)
+    start_date = end_date - timedelta(
+        days=days * 2
+    )  # fetch more data to ensure enough for moving average calculation
+    data = yf.download(ticker, start=start_date, end=end_date, progress=False)
+
+    if data.empty:
+        return pd.DataFrame(
+            {"Error": ["No data fetched"]}
+        )  # Return an empty DataFrame with an error message
+
+    # Calculate the moving average and the slope
+    data = calculate_moving_average(data, window)
+
+    # Drop rows where SMA or SMA_slope could not be calculated due to insufficient data
+    data = data.dropna(subset=["SMA", "SMA_slope"])
+
+    # Determine the current trend direction based on the latest SMA slope
+    trend_direction = "up" if data["SMA_slope"].iloc[-1] > 0 else "down"
+
+    # Calculate the duration of the current trend
+    trend_duration = 0
+    current_slope_sign = np.sign(
+        data["SMA_slope"].iloc[-1]
+    )  # Use .iloc for position-based indexing
+    reversed_slopes = data["SMA_slope"].iloc[
+        ::-1
+    ]  # Reverse the series using .iloc slicing
+    for slope in reversed_slopes:
+        if np.sign(slope) == current_slope_sign:
+            trend_duration += 1
+        else:
+            break
+
+    # Return the results as a DataFrame
+    return pd.DataFrame(
+        {
+            "Company code": [ticker],
+            "Trend Direction": [trend_direction],
+            "Trend Duration (days)": [trend_duration],
+        }
+    )

@@ -11,7 +11,7 @@ def log_dataframe_pretty(df: pd.DataFrame):
     table_string = tabulate(
         df, headers="keys", tablefmt="psql"
     )  # Convert DataFrame to pretty table
-    logger.info(table_string)
+    logger.info(f"\n{table_string}")
 
 
 def s3_save_pd_dataframe(df: pd.DataFrame, bucket: str, key: str):

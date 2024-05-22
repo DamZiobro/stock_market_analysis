@@ -44,7 +44,7 @@ def calculate_dividend_capture_returns(
     df["Profit in GBP"] = (
         df["Selling Amount"]
         - df["Buying Amount"]
-        #+ df["Dividend Received"]
+        + df["Dividend Received"]
         - transactions_fees
     )
     df["Percent Profit"] = (df["Profit in GBP"] / df["Buying Amount"]) * 100

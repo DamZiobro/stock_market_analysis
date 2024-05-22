@@ -8,6 +8,7 @@ import click
 from pydantic import BaseModel
 
 from stock_market_analysis.src.stock_data_fetcher import (
+    fetch_chart_trend,
     fetch_close_price,
     fetch_close_prices,
     fetch_historic_dividends,
@@ -107,6 +108,17 @@ def historic_dividends(ticker: str, limit: int = 10):
         click.echo(f"Dividends for {ticker}:\n{dividends}")
     else:
         click.echo(f"No dividend data available for {ticker}.")
+
+
+@stock_data.command()
+@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
+@click.option(
+    "--days", default=90, help="Number of days to consider for the trend analysis."
+)
+def chart_trend(ticker: str, days: int = 90):
+    """Command-line tool to fetch the stock chart trend and it's length in days."""
+    stock_trend_info_df = fetch_chart_trend(ticker, days)
+    log_dataframe_pretty(stock_trend_info_df)
 
 
 @stock_data.command()

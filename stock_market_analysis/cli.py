@@ -14,6 +14,8 @@ from stock_market_analysis.src.stock_data_fetcher import (
     fetch_close_price,
     fetch_close_prices,
     fetch_historic_dividends,
+    fetch_volume_analysis_data,
+    fetch_volume_analysis_data_multiple_tickers,
 )
 from stock_market_analysis.src.utils import log_dataframe_pretty
 from stock_market_analysis.steps.dividendCaptureAnalysis import (
@@ -116,17 +118,6 @@ def historic_dividends(ticker: str, limit: int = 10):
 
 
 @stock_data.command()
-@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
-@click.option(
-    "--days", default=90, help="Number of days to consider for the trend analysis."
-)
-def chart_trend(ticker: str, days: int = 90):
-    """Command-line tool to fetch the stock chart trend and it's length in days."""
-    stock_trend_info_df = fetch_chart_trend(ticker, days)
-    log_dataframe_pretty(stock_trend_info_df)
-
-
-@stock_data.command()
 @click.option("--ticker", type=str, required=True, help="Stock ticker symbol")
 @click.option(
     "--investment_amount", type=int, default=10000, help="Amount in GBP to be invested"
@@ -169,6 +160,17 @@ def dividend_capture_analysis(
 
 
 @stock_data.command()
+@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
+@click.option(
+    "--days", default=90, help="Number of days to consider for the trend analysis."
+)
+def chart_trend(ticker: str, days: int = 90):
+    """Command-line tool to fetch the stock chart trend and it's length in days."""
+    stock_trend_info_df = fetch_chart_trend(ticker, days)
+    log_dataframe_pretty(stock_trend_info_df)
+
+
+@stock_data.command()
 @click.option(
     "--file",
     type=click.Path(exists=True),
@@ -203,7 +205,72 @@ def chart_trends(
     # Print the resulting DataFrame
     pd.set_option("display.max_rows", None)
     if not trends.empty:
-        click.echo(trends)
+        log_dataframe_pretty(trends)
+    else:
+        click.echo("No trend data available.")
+
+
+@stock_data.command()
+@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
+@click.option(
+    "--days", default=90, help="Number of days to consider for the trend analysis."
+)
+def volume_analysis_single(ticker: str, days: int = 90):
+    """Command-line tool to fetch the stock chart trend and it's length in days."""
+    volume_analysis_df = fetch_volume_analysis_data(ticker, days)
+    log_dataframe_pretty(volume_analysis_df)
+
+
+@stock_data.command()
+@click.option(
+    "--file",
+    type=click.Path(exists=True),
+    help="Path to the CSV file containing stock tickers.",
+    default=PATH_TO_FTSE_CSV,
+)
+@click.option(
+    "--days",
+    default=90,
+    help="Number of days to consider for the trend analysis.",
+    type=int,
+)
+@click.option(
+    "--window",
+    default=30,
+    help="Window size for calculating the moving average.",
+    type=int,
+)
+def volume_analysis(
+    file: click.Path = PATH_TO_FTSE_CSV,  # type: ignore
+    days: int = 90,
+    window: int = 30,
+):
+    """Read stock codes from a CSV file and fetches their trend information."""
+    # Read tickers from the CSV file
+    tickers_df = pd.read_csv(file)
+    tickers = tickers_df["Code"].tolist()
+
+    # Call the function to get trends
+    volumes = fetch_volume_analysis_data_multiple_tickers(tickers, days)
+    trends = fetch_chart_trends(tickers, days, window)
+
+    result_df = trends.merge(volumes, on="Company code")
+    result_df = result_df.sort_values(
+        by=[
+            "Trend Direction",
+            "Trend Duration (days)",
+            "increasing_volume_days",
+            "average_volume",
+            "decreasing_volume_days",
+        ],
+        ascending=[False, False, False, False, False],
+    )
+    result_df = result_df.reset_index(drop=True)
+
+    # Print the resulting DataFrame
+    pd.set_option("display.max_rows", None)
+    if not volumes.empty:
+        log_dataframe_pretty(result_df)
     else:
         click.echo("No trend data available.")
 

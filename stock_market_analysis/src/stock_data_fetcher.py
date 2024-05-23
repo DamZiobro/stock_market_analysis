@@ -1,6 +1,7 @@
 """Fetching data from yahoo finance."""
 
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
@@ -9,6 +10,8 @@ import yfinance as yf
 from joblib import Parallel, delayed
 from pydantic import NonNegativeInt, constr
 from yfinance import Ticker
+
+from stock_market_analysis.src.utils import cache_to_pickle
 
 
 def fetch_close_prices(ticker: str, days: int = 15) -> List[float]:
@@ -64,6 +67,7 @@ def fetch_close_price(ticker: str, date: datetime) -> Optional[float]:
         return None
 
 
+@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
 def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFrame]:
     """Fetch the historical dividend data for a given stock ticker.
 
@@ -169,6 +173,7 @@ def calculate_moving_average(data: pd.DataFrame, window: int) -> pd.DataFrame:
     return data
 
 
+@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
 def fetch_chart_trend(ticker: str, days: int = 90, window: int = 30):
     """Get the stock price trend and its duration for the specified ticker over the last N days.
 
@@ -266,8 +271,9 @@ def fetch_chart_trends(tickers: list[str], days: int = 90, window: int = 30):
     return result_df.reset_index(drop=True)
 
 
+@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
 def fetch_volume_analysis_data(
-    ticker: constr(min_length=1), days: NonNegativeInt  #type: ignore
+    ticker: constr(min_length=1), days: NonNegativeInt  # type: ignore
 ) -> pd.DataFrame:
     """Perform volume analysis on a given stock ticker.
 

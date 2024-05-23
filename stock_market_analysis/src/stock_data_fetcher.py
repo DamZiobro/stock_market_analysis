@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 from joblib import Parallel, delayed
+from pydantic import NonNegativeInt, constr
 from yfinance import Ticker
 
 
@@ -258,7 +259,78 @@ def fetch_chart_trends(tickers: list[str], days: int = 90, window: int = 30):
     result_df = pd.concat(results, ignore_index=True)
     # filter out all rows with NaN direction (errored columns)
     result_df = result_df.dropna(subset=["Trend Direction", "Trend Duration (days)"])
+    result_df = result_df.drop(columns=["Error"])
     result_df = result_df.sort_values(
         by=["Trend Direction", "Trend Duration (days)"], ascending=[False, False]
+    )
+    return result_df.reset_index(drop=True)
+
+
+def fetch_volume_analysis_data(
+    ticker: constr(min_length=1), days: NonNegativeInt  #type: ignore
+) -> pd.DataFrame:
+    """Perform volume analysis on a given stock ticker.
+
+    Args:
+    ----
+        ticker (str): Stock ticker symbol.
+        days (NonNegativeInt): Number of recent days to analyze.
+
+    Returns:
+    -------
+        pd.DataFrame: DataFrame containing the analysis results.
+    """
+    # Fetch historical data
+    stock_data = yf.download(ticker, period=f"{days}d", progress=False)
+    if stock_data.empty:
+        return pd.DataFrame(
+            {"Error": ["No data fetched"]}
+        )  # Return an empty DataFrame with an error message
+
+    # Calculate daily returns
+    stock_data["Returns"] = stock_data["Close"].pct_change()
+
+    # Analyze volume trends
+    increasing_volume = (stock_data["Volume"].diff() > 0).sum()
+    decreasing_volume = (stock_data["Volume"].diff() < 0).sum()
+    avg_volume = stock_data["Volume"].mean()
+    volume_spikes = stock_data[stock_data["Volume"] > 2 * avg_volume]
+
+    analysis_results = {
+        "Company code": ticker,
+        "average_volume": avg_volume,
+        "increasing_volume_days": increasing_volume,
+        "decreasing_volume_days": decreasing_volume,
+        "volume_spikes_count": len(volume_spikes),
+    }
+
+    return pd.DataFrame([analysis_results])
+
+
+def fetch_volume_analysis_data_multiple_tickers(
+    tickers: List[constr(min_length=1)], days: NonNegativeInt, n_jobs: int = -1  # type: ignore
+) -> pd.DataFrame:
+    """Perform volume analysis on multiple stock tickers in parallel.
+
+    Args:
+    ----
+        tickers (List[str]): List of stock ticker symbols.
+        days (NonNegativeInt): Number of recent days to analyze for each ticker.
+        n_jobs (int): Number of jobs to run in parallel. Default is -1 (use all processors).
+
+    Returns:
+    -------
+        pd.DataFrame: DataFrame containing the analysis results for all tickers.
+    """
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(fetch_volume_analysis_data)(ticker, days) for ticker in tickers
+    )
+    result_df = pd.concat(results, ignore_index=True)
+
+    result_df = result_df.dropna(subset=["average_volume"])
+    result_df = result_df.drop(columns=["Error"])
+    result_df = result_df.sort_values(
+        by=["increasing_volume_days", "average_volume", "decreasing_volume_days"],
+        ascending=[False, False, False],
     )
     return result_df.reset_index(drop=True)

@@ -1,20 +1,20 @@
 Code,Name
-SHEL,Shell
-AZN,AstraZeneca
-HSBA,HSBC Holdings
-BHP,BHP Group Ltd
-ULVR,Unilever
-BP,BP
-GSK,GSK
-RIO,Rio Tinto
-BNC,Banco Santander SA
-REL,RELX
-DGE,Diageo
-GLEN,Glencore
-BATS,British American Tobacco
-LSEG,London Stock Exchange Group
-CRH,CRH
-BA,BAE Systems
-NG,National Grid
-CPG,Compass Group
-RR,Rolls-Royce Group
+SHEL.L,Shell
+AZN.L,AstraZeneca
+HSBA.L,HSBC Holdings
+BHP.L,BHP Group Ltd
+ULVR.L,Unilever
+BP.L,BP
+GSK.L,GSK
+RIO.L,Rio Tinto
+BNC.L,Banco Santander SA
+REL.L,RELX
+DGE.L,Diageo
+GLEN.L,Glencore
+BATS.L,British American Tobacco
+LSEG.L,London Stock Exchange Group
+CRH.L,CRH
+BA.L,BAE Systems
+NG.L,National Grid
+CPG.L,Compass Group
+RR.L,Rolls-Royce Group

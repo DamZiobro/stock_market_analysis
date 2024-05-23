@@ -10,18 +10,34 @@ provider:
         - "lambda:InvokeFunction"
         - "states:*"
       Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+        - "s3:ListBucket"
+      Resource:
+        - "arn:aws:s3:::${self:custom.bucketName}"
+        - "arn:aws:s3:::${self:custom.bucketName}/*"
 
 plugins:
   - serverless-step-functions
   - serverless-python-requirements
 
 custom:
+  bucketName: xmementoit-stock-market-analysis-asdfyuxc
   pythonRequirements:
     dockerizePip: false  # Optional: only necessary if you need to build in an environment identical to AWS Lambda
     usePoetry: true
     slim: true
     strip: true  # Optional: set to true to strip the .so files of debug information
     layer: false  # Optional: if you want to package your dependencies as a Lambda layer
+
+resources:
+  Resources:
+    DataBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
 
 package:
   exclude:
@@ -32,6 +48,8 @@ package:
     - .mypy_cache/**
     - .pytest_cache/**
     - .ruff_cache/**
+    - '**/tests/'
+    - '**/tests/**'
     - package-lock.json
     - package.json
     - poetry.lock
@@ -41,6 +59,7 @@ package:
     - mkdocs.yml
     - .coverage
     - .coveragerc
+    - .requirements.zip
 
 functions:
   fetchData:
@@ -54,7 +73,7 @@ functions:
     memorySize: 256
   dividendCaptureAnalysis:
     handler: stock_market_analysis.steps.dividendCaptureAnalysis.handler
-    memorySize: 256
+    memorySize: 1024
     timeout: 120
 
 stepFunctions:

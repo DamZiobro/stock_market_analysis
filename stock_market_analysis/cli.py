@@ -5,9 +5,12 @@ from datetime import datetime
 from typing import List
 
 import click
+import pandas as pd
 from pydantic import BaseModel
 
 from stock_market_analysis.src.stock_data_fetcher import (
+    fetch_chart_trend,
+    fetch_chart_trends,
     fetch_close_price,
     fetch_close_prices,
     fetch_historic_dividends,
@@ -16,6 +19,9 @@ from stock_market_analysis.src.utils import log_dataframe_pretty
 from stock_market_analysis.steps.dividendCaptureAnalysis import (
     get_dividend_capture_return,
 )
+
+
+PATH_TO_FTSE_CSV = "stock_market_analysis/data/ftse.csv"
 
 
 class HistoricalDataResponse(BaseModel):
@@ -41,7 +47,7 @@ def version():
 
 
 @stock_data.command()
-@click.argument("stock_symbol", type=str)
+@click.option("--ticker", help="Stock ticker symbol, e.g., AAPL")
 @click.option(
     "--days",
     default=15,
@@ -49,12 +55,12 @@ def version():
     help="Number of days to fetch historical close prices for",
     type=int,
 )
-def close_prices(stock_symbol: str, days: int = 15):
+def close_prices(ticker: str, days: int = 15):
     """Fetch historical close prices for a given stock symbol over a specified number of days.
 
     Args:
     ----
-        stock_symbol (str): The stock ticker symbol for which historical data is fetched.
+        ticker (str): The stock ticker symbol for which historical data is fetched.
         days (Optional[int]): The number of days to fetch historical prices for. Defaults to 15.
 
     Returns:
@@ -65,9 +71,9 @@ def close_prices(stock_symbol: str, days: int = 15):
     ------
         Prints an error message if data fetching fails.
     """
-    prices = fetch_close_prices(stock_symbol, days=days)
+    prices = fetch_close_prices(ticker, days=days)
     data_response = HistoricalDataResponse(prices=prices)
-    click.echo(f"Historical Prices for {stock_symbol}: {data_response.prices}")
+    click.echo(f"Historical Prices for {ticker}: {data_response.prices}")
 
 
 @stock_data.command()
@@ -110,6 +116,17 @@ def historic_dividends(ticker: str, limit: int = 10):
 
 
 @stock_data.command()
+@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
+@click.option(
+    "--days", default=90, help="Number of days to consider for the trend analysis."
+)
+def chart_trend(ticker: str, days: int = 90):
+    """Command-line tool to fetch the stock chart trend and it's length in days."""
+    stock_trend_info_df = fetch_chart_trend(ticker, days)
+    log_dataframe_pretty(stock_trend_info_df)
+
+
+@stock_data.command()
 @click.option("--ticker", type=str, required=True, help="Stock ticker symbol")
 @click.option(
     "--investment_amount", type=int, default=10000, help="Amount in GBP to be invested"
@@ -149,6 +166,46 @@ def dividend_capture_analysis(
 
     if returns_df is not None:
         log_dataframe_pretty(returns_df)
+
+
+@stock_data.command()
+@click.option(
+    "--file",
+    type=click.Path(exists=True),
+    help="Path to the CSV file containing stock tickers.",
+    default=PATH_TO_FTSE_CSV,
+)
+@click.option(
+    "--days",
+    default=90,
+    help="Number of days to consider for the trend analysis.",
+    type=int,
+)
+@click.option(
+    "--window",
+    default=30,
+    help="Window size for calculating the moving average.",
+    type=int,
+)
+def chart_trends(
+    file: click.Path = PATH_TO_FTSE_CSV,  # type: ignore
+    days: int = 90,
+    window: int = 30,
+):
+    """Read stock codes from a CSV file and fetches their trend information."""
+    # Read tickers from the CSV file
+    tickers_df = pd.read_csv(file)
+    tickers = tickers_df["Code"].tolist()
+
+    # Call the function to get trends
+    trends = fetch_chart_trends(tickers, days, window)
+
+    # Print the resulting DataFrame
+    pd.set_option("display.max_rows", None)
+    if not trends.empty:
+        click.echo(trends)
+    else:
+        click.echo("No trend data available.")
 
 
 @click.group()

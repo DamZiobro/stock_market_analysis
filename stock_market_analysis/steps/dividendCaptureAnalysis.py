@@ -6,7 +6,7 @@ import pandas as pd
 
 from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.stock_data_fetcher import fetch_historic_dividends
-from stock_market_analysis.src.utils import log_dataframe_pretty
+from stock_market_analysis.src.utils import log_dataframe_pretty, s3_save_pd_dataframe
 
 
 HL_BUY_AND_SELL_COST = 2 * 11.95  # buy and sell fee in Heargraves and Landsdown
@@ -107,19 +107,25 @@ def handler(event: list[dict[str, str]], context: dict):  # noqa: ARG001
     )
     logger.info("event: %s", json.dumps(event))
 
+    s3_bucket = "xmementoit-stock-market-analysis-asdfyuxc"
     for item in event:
-        ticker = item["Code"] + ".L"
+        ticker = item["Code"]
+        s3_key = f"data/dividend_capture_analysis/{ticker}.csv"
         returns_df = get_dividend_capture_return(ticker)
         logger.info(f"Dividend profits of '({ticker})':")
         log_dataframe_pretty(returns_df)
+        s3_save_pd_dataframe(returns_df, s3_bucket, s3_key)
 
-    # dividends = fetch_historic_dividends(ticker, limit)
-    return {"statusCode": 200, "body": "Hello World from dividendCaptureAnalysis"}
+    return {
+        "statusCode": 200,
+        "body": f"Successfully saved dividend_capture_analysis to S3 bucket {s3_bucket}",
+    }
 
 
 if __name__ == "__main__":
     event = [
-        {"Code": "ULVR", "Name": "Unilever"},
-        {"Code": "TEAM", "Name": "Team"},
+        {"Code": "ULVR.L", "Name": "Unilever"},
+        {"Code": "OCN.L", "Name": "Unilever"},
+        {"Code": "TEAM.L", "Name": "Team"},
     ]
     handler(event, {})

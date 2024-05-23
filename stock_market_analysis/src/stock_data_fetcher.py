@@ -6,6 +6,7 @@ from typing import List, Optional
 import numpy as np
 import pandas as pd
 import yfinance as yf
+from joblib import Parallel, delayed
 from yfinance import Ticker
 
 
@@ -224,3 +225,40 @@ def fetch_chart_trend(ticker: str, days: int = 90, window: int = 30):
             "Trend Duration (days)": [trend_duration],
         }
     )
+
+
+def fetch_chart_trends(tickers: list[str], days: int = 90, window: int = 30):
+    """Fetch stock price trends for a list of tickers.
+
+    and returns a DataFrame sorted by trend direction and duration.
+
+    Args:
+    ----
+        tickers (list of str): List of ticker symbols.
+        days (int): Number of days to consider for the trend analysis.
+        window (int): The window size for calculating the moving average.
+
+    Returns:
+    -------
+        pd.DataFrame: A DataFrame containing the trend direction and duration for each ticker.
+    """
+    # Define a helper function to fetch trend for a single ticker
+    def fetch_trend_for_ticker(ticker: str) -> pd.DataFrame:
+        return fetch_chart_trend(ticker, days, window)
+
+    # Use joblib to run fetching in parallel
+    results = Parallel(n_jobs=-1)(
+        delayed(fetch_trend_for_ticker)(ticker) for ticker in tickers
+    )
+
+    # Combine all individual DataFrame results into one DataFrame
+    if not results:
+        return pd.DataFrame()  # Return empty DataFrame if no results
+
+    result_df = pd.concat(results, ignore_index=True)
+    # filter out all rows with NaN direction (errored columns)
+    result_df = result_df.dropna(subset=["Trend Direction", "Trend Duration (days)"])
+    result_df = result_df.sort_values(
+        by=["Trend Direction", "Trend Duration (days)"], ascending=[False, False]
+    )
+    return result_df.reset_index(drop=True)

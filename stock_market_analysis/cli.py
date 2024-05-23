@@ -5,10 +5,12 @@ from datetime import datetime
 from typing import List
 
 import click
+import pandas as pd
 from pydantic import BaseModel
 
 from stock_market_analysis.src.stock_data_fetcher import (
     fetch_chart_trend,
+    fetch_chart_trends,
     fetch_close_price,
     fetch_close_prices,
     fetch_historic_dividends,
@@ -17,6 +19,9 @@ from stock_market_analysis.src.utils import log_dataframe_pretty
 from stock_market_analysis.steps.dividendCaptureAnalysis import (
     get_dividend_capture_return,
 )
+
+
+PATH_TO_FTSE_CSV = "stock_market_analysis/data/ftse.csv"
 
 
 class HistoricalDataResponse(BaseModel):
@@ -161,6 +166,46 @@ def dividend_capture_analysis(
 
     if returns_df is not None:
         log_dataframe_pretty(returns_df)
+
+
+@stock_data.command()
+@click.option(
+    "--file",
+    type=click.Path(exists=True),
+    help="Path to the CSV file containing stock tickers.",
+    default=PATH_TO_FTSE_CSV,
+)
+@click.option(
+    "--days",
+    default=90,
+    help="Number of days to consider for the trend analysis.",
+    type=int,
+)
+@click.option(
+    "--window",
+    default=30,
+    help="Window size for calculating the moving average.",
+    type=int,
+)
+def chart_trends(
+    file: click.Path = PATH_TO_FTSE_CSV,  # type: ignore
+    days: int = 90,
+    window: int = 30,
+):
+    """Read stock codes from a CSV file and fetches their trend information."""
+    # Read tickers from the CSV file
+    tickers_df = pd.read_csv(file)
+    tickers = tickers_df["Code"].tolist()
+
+    # Call the function to get trends
+    trends = fetch_chart_trends(tickers, days, window)
+
+    # Print the resulting DataFrame
+    pd.set_option("display.max_rows", None)
+    if not trends.empty:
+        click.echo(trends)
+    else:
+        click.echo("No trend data available.")
 
 
 @click.group()

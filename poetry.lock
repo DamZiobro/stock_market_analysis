@@ -352,6 +352,14 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "joblib"
+version = "1.4.2"
+description = "Lightweight pipelining with Python functions"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
 name = "lxml"
 version = "5.2.1"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -1047,7 +1055,7 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "af1d432f4f183d2999f4af6af3fe25111fee3d1b95c7017bcf20d6d654c859fc"
+content-hash = "7c36896b3f0349a4169e9b2c81e1bd28c58d1bafc3ff4b2829a4f9157ea1cb7f"
 
 [metadata.files]
 aiobotocore = []
@@ -1079,6 +1087,7 @@ idna = []
 iniconfig = []
 jinja2 = []
 jmespath = []
+joblib = []
 lxml = []
 markdown = []
 markupsafe = []

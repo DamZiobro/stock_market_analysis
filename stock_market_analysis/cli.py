@@ -14,6 +14,8 @@ from stock_market_analysis.src.stock_data_fetcher import (
     fetch_close_price,
     fetch_close_prices,
     fetch_historic_dividends,
+    fetch_momentum_analysis,
+    fetch_momentum_analysis_single,
     fetch_volume_analysis_data,
     fetch_volume_analysis_data_multiple_tickers,
 )
@@ -273,6 +275,60 @@ def volume_analysis(
         log_dataframe_pretty(result_df)
     else:
         click.echo("No trend data available.")
+
+
+@stock_data.command()
+@click.option("--ticker", default="AAPL", help="Stock ticker symbol (e.g., AAPL).")
+@click.option(
+    "--lookback_days",
+    default=10,
+    help="Number of days wee look ahead when checking for price gain"
+    ". Defaults to 10.",
+)
+@click.option("--lookup_yield", default=5.0, help="Yield we look for. Defaults to 5.0")
+def momentum_analysis_single(
+    ticker: str, lookback_days: int = 10, lookup_yield: float = 5.0
+):
+    """Command-line tool to fetch the stock chart trend and it's length in days."""
+    stock_trend_info_df = fetch_momentum_analysis_single(
+        ticker, lookback_days, lookup_yield
+    )
+    log_dataframe_pretty(stock_trend_info_df)
+
+
+@stock_data.command()
+@click.option(
+    "--file",
+    type=click.Path(exists=True),
+    help="Path to the CSV file containing stock tickers.",
+    default=PATH_TO_FTSE_CSV,
+)
+@click.option(
+    "--lookback_days",
+    default=10,
+    help="Number of days we look ahead when checking for price gain"
+    ". Defaults to 10.",
+)
+@click.option("--lookup_yield", default=5.0, help="Yield we look for. Defaults to 5.0")
+def momentum_analysis(
+    file: click.Path = PATH_TO_FTSE_CSV,  # type: ignore
+    lookback_days: int = 10,
+    lookup_yield: float = 5.0
+):
+    """Read stock codes from a CSV file and fetches their trend information."""
+    # Read tickers from the CSV file
+    tickers_df = pd.read_csv(file)
+    tickers = tickers_df["Code"].tolist()
+
+    # Call the function to get trends
+    df = fetch_momentum_analysis(tickers, lookback_days, lookup_yield)
+
+    # Print the resulting DataFrame
+    pd.set_option("display.max_rows", None)
+    if not df.empty:
+        log_dataframe_pretty(df)
+    else:
+        click.echo("No momentum_analysis data available.")
 
 
 @click.group()

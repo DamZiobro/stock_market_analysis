@@ -4,9 +4,10 @@ import pickle
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import pandas as pd
+import yfinance as yf
 from tabulate import tabulate
 
 from stock_market_analysis.src.logger import logger
@@ -47,7 +48,7 @@ def cache_to_pickle(cache_dir: Path) -> Callable:
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args: list[any], **kwargs: dict[str, any]) -> any: # type: ignore
+        def wrapper(*args: list[any], **kwargs: dict[str, any]) -> any:  # type: ignore
             # Create a unique cache key based on the function name and arguments
             cache_key = sha256(
                 (func.__name__ + str(args) + str(kwargs)).encode()
@@ -72,3 +73,10 @@ def cache_to_pickle(cache_dir: Path) -> Callable:
         return wrapper
 
     return decorator
+
+
+@cache_to_pickle(Path("/tmp/cache/yf_download"))  # noqa: S108
+def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
+    """Download data from yahoo finance and store as pickled data."""
+    logger.info("Downloading yahoo data for: args=(%s); kwargs=(%s)")
+    return yf.download(*args, **kwargs)

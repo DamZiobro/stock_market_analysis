@@ -340,12 +340,14 @@ def momentum_analysis(
     default="1y",
     help="Pandas' based period of downloading data." ". Defaults to 1y.",
 )
-@click.option(
-    "--amount", type=int, default=5000, help="Amount in GBP to be invested"
-)
-def macd_3_day_rule_backtesting_single(ticker: str, period: str = "1y", amount: int = 5000):
+@click.option("--amount", type=int, default=5000, help="Amount in GBP to be invested")
+def macd_3_day_rule_backtesting_single(
+    ticker: str, period: str = "1y", amount: int = 5000
+):
     """Command-line tool to fetch the stock chart trend and it's length in days."""
-    stock_trend_info_df = fetch_macd_3_day_rule_backtesting_single(ticker, period, amount)
+    stock_trend_info_df = fetch_macd_3_day_rule_backtesting_single(
+        ticker, period, amount
+    )
     log_dataframe_pretty(stock_trend_info_df)
 
 
@@ -361,9 +363,7 @@ def macd_3_day_rule_backtesting_single(ticker: str, period: str = "1y", amount: 
     default="1y",
     help="Pandas' based period of downloading data." ". Defaults to 1y.",
 )
-@click.option(
-    "--amount", type=int, default=5000, help="Amount in GBP to be invested"
-)
+@click.option("--amount", type=int, default=5000, help="Amount in GBP to be invested")
 def macd_3_day_rule_backtesting(
     file: click.Path = PATH_TO_FTSE_CSV,  # type: ignore
     period: str = "1y",
@@ -383,12 +383,3 @@ def macd_3_day_rule_backtesting(
         log_dataframe_pretty(df)
     else:
         click.echo("No momentum_analysis data available.")
-
-
-@click.group()
-def cli():
-    """CLI main command group."""
-
-
-cli.add_command(general)
-cli.add_command(stock_data)

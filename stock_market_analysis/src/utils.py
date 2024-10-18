@@ -78,5 +78,5 @@ def cache_to_pickle(cache_dir: Path) -> Callable:
 @cache_to_pickle(Path("/tmp/cache/yf_download"))  # noqa: S108
 def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
     """Download data from yahoo finance and store as pickled data."""
-    logger.info("Downloading yahoo data for: args=(%s); kwargs=(%s)")
+    logger.info("Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs)
     return yf.download(*args, **kwargs)

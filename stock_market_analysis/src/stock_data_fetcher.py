@@ -1,11 +1,13 @@
 """Fetching data from yahoo finance."""
 
+import math
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
 import pandas as pd
+import ta
 import yfinance as yf
 from joblib import Parallel, delayed
 from pydantic import NonNegativeInt, constr
@@ -273,21 +275,8 @@ def fetch_momentum_analysis_single(
         ValueError: If the stock data cannot be fetched or if the calculations fail.
     """
     oversold_signal_rsi = 30  # oversold RSI (< 30) are a BUY SIGNAL
-    error_df = pd.DataFrame(
-        {
-            "Company code": [ticker],
-            "Buy Probability": [0],
-        }
-    )
     # Fetch stock data
-    try:
-        if ticker in ["88 Energy Ltd.L", "First Tin.L", "GTE.L"]:
-            return error_df
-        stock_data = yf_download(ticker, period="6mo", interval="1d")
-        # exclude some tickers
-    except Exception:
-        logger.exception(f"ERROR: Exception for ticker: {ticker}:")
-        return error_df
+    stock_data = yf_download(ticker, period="6mo", interval="1d")
 
     # Calculate RSI (Relative Strength Index)
     rsi_df = calculate_rsi(stock_data)
@@ -495,7 +484,6 @@ def fetch_chart_trends(tickers: list[str], days: int = 90, window: int = 30):
     result_df = pd.concat(results, ignore_index=True)
     # filter out all rows with NaN direction (errored columns)
     result_df = result_df.dropna(subset=["Trend Direction", "Trend Duration (days)"])
-    result_df = result_df.drop(columns=["Error"])
     result_df = result_df.sort_values(
         by=["Trend Direction", "Trend Duration (days)"], ascending=[False, False]
     )
@@ -569,5 +557,131 @@ def fetch_volume_analysis_data_multiple_tickers(
     result_df = result_df.sort_values(
         by=["increasing_volume_days", "average_volume", "decreasing_volume_days"],
         ascending=[False, False, False],
+    )
+    return result_df.reset_index(drop=True)
+
+
+@cache_to_pickle(Path("/tmp/cache/macd"))  # noqa: S108
+def fetch_macd_3_day_rule_backtesting_single(
+    ticker: constr(min_length=1), period: str = "1y", amount: int = 5000  # type: ignore
+) -> pd.DataFrame:
+    """Backtesting of MACD-based rule with 3 days of buy."""
+    # Download data
+    data = yf_download(ticker, period=period, progress=False)
+    # Calculate MACD
+    macd = ta.trend.MACD(close=data["Close"])
+    data["MACD"] = macd.macd()
+    data["Signal"] = macd.macd_signal()
+    data["Histogram"] = macd.macd_diff()
+
+    # Generate signals
+    data["Raw_Signal"] = 0
+
+    # Buy signal: 3 consecutive days of negative but growing histogram values
+    buy_condition = (
+        (data["Histogram"] < 0)
+        & (data["Histogram"] > data["Histogram"].shift(1))
+        & (data["Histogram"].shift(1) < 0)
+        & (data["Histogram"].shift(1) > data["Histogram"].shift(2))
+        & (data["Histogram"].shift(2) < 0)
+        & (data["Histogram"].shift(2) > data["Histogram"].shift(3))
+    )
+
+    # Sell signal: 3 consecutive days of declining histogram values (regardless of sign)
+    sell_condition = (
+        (data["Histogram"] < data["Histogram"].shift(1))
+        & (data["Histogram"].shift(1) < data["Histogram"].shift(2))
+        & (data["Histogram"].shift(2) < data["Histogram"].shift(3))
+    )
+
+    data.loc[buy_condition, "Raw_Signal"] = 1
+    data.loc[sell_condition, "Raw_Signal"] = -1
+
+    # Process signals to ensure correct order
+    data["Trade_Signal"] = 0
+    data["Transaction"] = ""
+    data["Shares"] = 0
+    data["Transaction_Price"] = 0
+    data["Transaction_Value"] = 0
+
+    in_position = False
+    shares = 0
+    cash = amount
+
+    for i in range(len(data)):
+        if not in_position and data["Raw_Signal"].iloc[i] == 1 and cash > 0:
+            data.loc[data.index[i], "Trade_Signal"] = 1
+            shares = math.floor(cash / data["Close"].iloc[i])
+            actual_investment = shares * data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction"] = "Buy"
+            data.loc[data.index[i], "Shares"] = shares
+            data.loc[data.index[i], "Transaction_Price"] = data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction_Value"] = actual_investment
+            cash -= actual_investment
+            in_position = True
+        elif in_position and data["Raw_Signal"].iloc[i] == -1:
+            data.loc[data.index[i], "Trade_Signal"] = -1
+            data.loc[data.index[i], "Transaction"] = "Sell"
+            data.loc[data.index[i], "Shares"] = shares
+            data.loc[data.index[i], "Transaction_Price"] = data["Close"].iloc[i]
+            sell_value = shares * data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction_Value"] = sell_value
+            cash += sell_value
+            shares = 0
+            in_position = False
+
+    # Print transactions
+    transaction_data = data[data["Transaction"] != ""]
+    print("\nTransactions:")
+    print(
+        transaction_data[
+            ["Transaction", "Transaction_Price", "Shares", "Transaction_Value"]
+        ]
+    )
+
+    # Calculate final value and return
+    final_value = cash
+    if in_position:
+        final_value += shares * data["Close"].iloc[-1]
+
+    cumulative_return = (final_value - amount) / amount
+
+    # Create result dataframe
+    return pd.DataFrame(
+        {
+            "ticker": [ticker],
+            "Cumulative Amount": [final_value],
+            "Cumulative Yield (%)": [cumulative_return * 100],
+        }
+    )
+
+
+def fetch_macd_3_day_rule_backtesting(
+    tickers: List[constr(min_length=1)],  # type: ignore
+    period: str = "1y",
+    amount: int = 5000,
+    n_jobs: int = -1
+) -> pd.DataFrame:
+    """Perform volume analysis on multiple stock tickers in parallel.
+
+    Args:
+    ----
+        tickers (List[str]): List of stock ticker symbols.
+        days (NonNegativeInt): Number of recent days to analyze for each ticker.
+        n_jobs (int): Number of jobs to run in parallel. Default is -1 (use all processors).
+
+    Returns:
+    -------
+        pd.DataFrame: DataFrame containing the analysis results for all tickers.
+    """
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(fetch_macd_3_day_rule_backtesting_single)(ticker, period, amount)
+        for ticker in tickers
+    )
+    result_df = pd.concat(results, ignore_index=True)
+
+    result_df = result_df.sort_values(
+        by=["Cumulative Amount"],
+        ascending=[False],
     )
     return result_df.reset_index(drop=True)

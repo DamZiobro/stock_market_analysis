@@ -174,7 +174,7 @@ def calculate_moving_average(data: pd.DataFrame, window: int) -> pd.DataFrame:
     return data
 
 
-def calculate_rsi(data: pd.DataFrame, window: Optional[int] = 14) -> float:
+def calculate_rsi(data: pd.DataFrame, window: Optional[int] = 14):
     """Calculate the Relative Strength Index (RSI).
 
     Args:
@@ -241,7 +241,7 @@ def calculate_bollinger_bands(
     return upper_band, lower_band
 
 
-@cache_to_pickle(Path("/tmp/cache/momentum"))  # noqa: S108
+# @cache_to_pickle(Path("/tmp/cache/momentum"))
 def fetch_momentum_analysis_single(
     ticker: str, lookback_days: int = 10, lookup_yield: float = 5.0
 ):
@@ -290,7 +290,13 @@ def fetch_momentum_analysis_single(
         return error_df
 
     # Calculate RSI (Relative Strength Index)
-    stock_data["RSI"] = calculate_rsi(stock_data)
+    rsi_df = calculate_rsi(stock_data)
+    stock_data["RSI"] = rsi_df
+
+    recent_rsi = None
+    if len(rsi_df) > 1:
+        recent_rsi = rsi_df.iloc[-1]
+        print(recent_rsi)
 
     # Calculate short-term and long-term Moving Averages
     stock_data["MA_10"] = stock_data["Adj Close"].rolling(window=10).mean()
@@ -309,7 +315,7 @@ def fetch_momentum_analysis_single(
     # Define momentum signals
     stock_data["Momentum Signal"] = np.where(
         (stock_data["RSI"] < oversold_signal_rsi),
-        #& (stock_data["MA_10"] > stock_data["MA_50"]),
+        # & (stock_data["MA_10"] > stock_data["MA_50"]),
         # & (stock_data["MACD_Diff"] > 0)
         # & (stock_data["Adj Close"] < stock_data["Lower_Band"]),
         1,
@@ -346,7 +352,7 @@ def fetch_momentum_analysis_single(
             "Company code": [ticker],
             "Signal Count": [signal_count],
             "Win Count": [win_count],
-            # "RSI": [stock_data["RSI"]],
+            "RSI": [recent_rsi],
             # "MA_10": [stock_data["MA_10"]],
             # "MA_50": [stock_data["MA_50"]],
             # "MACD_Diff": [stock_data["MACD_Diff"]],
@@ -392,7 +398,8 @@ def fetch_momentum_analysis(
     result_df = result_df.loc[result_df["Buy Probability"] != 0]
     # filter out all rows with NaN direction (errored columns)
     result_df = result_df.sort_values(
-        by=["Buy Probability", "Signal Count", "Company code"], ascending=[False, False, True]
+        by=["RSI", "Buy Probability", "Signal Count", "Company code"],
+        ascending=[True, False, False, True],
     )
     return result_df.reset_index(drop=True)
 

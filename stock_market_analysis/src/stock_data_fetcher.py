@@ -14,7 +14,7 @@ from pydantic import NonNegativeInt, constr
 from yfinance import Ticker
 
 from stock_market_analysis.src.logger import logger
-from stock_market_analysis.src.utils import cache_to_pickle, yf_download
+from stock_market_analysis.src.utils.utils import cache_to_pickle, yf_download
 
 
 def fetch_close_prices(ticker: str, days: int = 15) -> List[float]:
@@ -575,6 +575,7 @@ def fetch_macd_3_day_rule_backtesting_single(
     data["Histogram"] = macd.macd_diff()
 
     # Generate signals
+    data["Ticker"] = ticker
     data["Raw_Signal"] = 0
 
     # Buy signal: 3 consecutive days of negative but growing histogram values
@@ -635,7 +636,7 @@ def fetch_macd_3_day_rule_backtesting_single(
     print("\nTransactions:")
     print(
         transaction_data[
-            ["Transaction", "Transaction_Price", "Shares", "Transaction_Value"]
+            ["Ticker", "Transaction", "Transaction_Price", "Shares", "Transaction_Value"]
         ]
     )
 

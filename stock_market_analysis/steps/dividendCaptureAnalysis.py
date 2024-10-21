@@ -6,7 +6,7 @@ import pandas as pd
 
 from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.stock_data_fetcher import fetch_historic_dividends
-from stock_market_analysis.src.utils import log_dataframe_pretty, s3_save_pd_dataframe
+from stock_market_analysis.src.utils.utils import log_dataframe_pretty, s3_save_pd_dataframe
 
 
 HL_BUY_AND_SELL_COST = 2 * 11.95  # buy and sell fee in Heargraves and Landsdown

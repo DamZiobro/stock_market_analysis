@@ -148,12 +148,31 @@ urllib3 = {version = ">=1.25.4,<2.2.0 || >2.2.0,<3", markers = "python_version >
 crt = ["awscrt (==0.19.19)"]
 
 [[package]]
+name = "bottle"
+version = "0.13.2"
+description = "Fast and simple WSGI-framework for small web-applications."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "certifi"
 version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
 category = "main"
 optional = false
 python-versions = ">=3.6"
+
+[[package]]
+name = "cffi"
+version = "1.17.1"
+description = "Foreign Function Interface for Python calling C code."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pycparser = "*"
 
 [[package]]
 name = "charset-normalizer"
@@ -173,6 +192,17 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
+name = "clr-loader"
+version = "0.2.6"
+description = "Generic pure Python loader for .NET runtimes"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+cffi = ">=1.13"
 
 [[package]]
 name = "colorama"
@@ -358,6 +388,18 @@ description = "Lightweight pipelining with Python functions"
 category = "main"
 optional = false
 python-versions = ">=3.8"
+
+[[package]]
+name = "lightweight-charts"
+version = "2.1"
+description = "Python framework for TradingView's Lightweight Charts JavaScript library."
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pandas = "*"
+pywebview = ">=5.0.5"
 
 [[package]]
 name = "lxml"
@@ -608,7 +650,7 @@ python-versions = ">=3.9"
 name = "packaging"
 version = "24.0"
 description = "Core utilities for Python packages"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
@@ -705,6 +747,14 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "proxy-tools"
+version = "0.1.0"
+description = "Proxy Implementation"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
@@ -717,6 +767,14 @@ name = "pycodestyle"
 version = "2.11.1"
 description = "Python style guide checker"
 category = "dev"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "pycparser"
+version = "2.22"
+description = "C parser in Python"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 
@@ -783,6 +841,110 @@ pyyaml = "*"
 extra = ["pygments (>=2.12)"]
 
 [[package]]
+name = "pyobjc-core"
+version = "10.3.1"
+description = "Python<->ObjC Interoperability Module"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "pyobjc-framework-cocoa"
+version = "10.3.1"
+description = "Wrappers for the Cocoa frameworks on macOS"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pyobjc-core = ">=10.3.1"
+
+[[package]]
+name = "pyobjc-framework-quartz"
+version = "10.3.1"
+description = "Wrappers for the Quartz frameworks on macOS"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pyobjc-core = ">=10.3.1"
+pyobjc-framework-Cocoa = ">=10.3.1"
+
+[[package]]
+name = "pyobjc-framework-security"
+version = "10.3.1"
+description = "Wrappers for the framework Security on macOS"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pyobjc-core = ">=10.3.1"
+pyobjc-framework-Cocoa = ">=10.3.1"
+
+[[package]]
+name = "pyobjc-framework-webkit"
+version = "10.3.1"
+description = "Wrappers for the framework WebKit on macOS"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+pyobjc-core = ">=10.3.1"
+pyobjc-framework-Cocoa = ">=10.3.1"
+
+[[package]]
+name = "pyqt5"
+version = "5.15.11"
+description = "Python bindings for the Qt cross platform application toolkit"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+PyQt5-Qt5 = ">=5.15.2,<5.16.0"
+PyQt5-sip = ">=12.15,<13"
+
+[[package]]
+name = "pyqt5-qt5"
+version = "5.15.15"
+description = "The subset of a Qt installation needed by PyQt5."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
+name = "pyqt5-sip"
+version = "12.15.0"
+description = "The sip module support for PyQt5"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[[package]]
+name = "pyqtwebengine"
+version = "5.15.7"
+description = "Python bindings for the Qt WebEngine framework"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+PyQt5 = ">=5.15.4"
+PyQt5-sip = ">=12.13,<13"
+PyQtWebEngine-Qt5 = ">=5.15.0,<5.16.0"
+
+[[package]]
+name = "pyqtwebengine-qt5"
+version = "5.15.15"
+description = "The subset of a Qt installation needed by PyQtWebEngine."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pytest"
 version = "6.2.5"
 description = "pytest: simple powerful testing with Python"
@@ -830,12 +992,53 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 six = ">=1.5"
 
 [[package]]
+name = "pythonnet"
+version = "3.0.0"
+description = ".NET and Mono integration for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+clr-loader = ">=0.2.2,<0.3.0"
+
+[[package]]
 name = "pytz"
 version = "2024.1"
 description = "World timezone definitions, modern and historical"
 category = "main"
 optional = false
 python-versions = "*"
+
+[[package]]
+name = "pywebview"
+version = "5.3"
+description = "Build GUI for your Python program with JavaScript, HTML, and CSS"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+bottle = "*"
+proxy-tools = "*"
+pyobjc-core = {version = "*", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-Cocoa = {version = "*", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-Quartz = {version = "*", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-security = {version = "*", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-WebKit = {version = "*", markers = "sys_platform == \"darwin\""}
+PyQt5 = {version = "*", optional = true, markers = "extra == \"qt\""}
+pyqtwebengine = {version = "*", optional = true, markers = "extra == \"qt\""}
+pythonnet = {version = "*", markers = "sys_platform == \"win32\""}
+QtPy = {version = "*", markers = "sys_platform == \"openbsd6\""}
+typing-extensions = "*"
+
+[package.extras]
+android = ["kivy", "jnius"]
+cef = ["cefpython3"]
+gtk = ["pygobject", "pygobject-stubs"]
+pyside2 = ["qtpy", "pyside2"]
+pyside6 = ["qtpy", "pyside6"]
+qt = ["qtpy", "pyqt5", "pyqtwebengine"]
 
 [[package]]
 name = "pyyaml"
@@ -855,6 +1058,20 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 pyyaml = "*"
+
+[[package]]
+name = "qtpy"
+version = "2.4.1"
+description = "Provides an abstraction layer on top of the various Qt bindings (PyQt5/6 and PySide2/6)."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+packaging = "*"
+
+[package.extras]
+test = ["pytest (>=6,!=7.0.0,!=7.0.1)", "pytest-cov (>=3.0.0)", "pytest-qt"]
 
 [[package]]
 name = "regex"
@@ -1067,7 +1284,7 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "2af047d0ce1fb162914ecce6c063392dea010fba37b4a073ae86f44ff3adde94"
+content-hash = "abf4290cf14c4cbda60cc878f8b0015b7908b446a4344cebc0abf18f307cfae1"
 
 [metadata.files]
 aiobotocore = []
@@ -1082,9 +1299,12 @@ attrs = []
 babel = []
 beautifulsoup4 = []
 botocore = []
+bottle = []
 certifi = []
+cffi = []
 charset-normalizer = []
 click = []
+clr-loader = []
 colorama = []
 coverage = []
 flake8 = []
@@ -1100,6 +1320,7 @@ iniconfig = []
 jinja2 = []
 jmespath = []
 joblib = []
+lightweight-charts = []
 lxml = []
 markdown = []
 markupsafe = []
@@ -1126,19 +1347,34 @@ pathspec = []
 peewee = []
 platformdirs = []
 pluggy = []
+proxy-tools = []
 py = []
 pycodestyle = []
+pycparser = []
 pydantic = []
 pydantic-core = []
 pyflakes = []
 pygments = []
 pymdown-extensions = []
+pyobjc-core = []
+pyobjc-framework-cocoa = []
+pyobjc-framework-quartz = []
+pyobjc-framework-security = []
+pyobjc-framework-webkit = []
+pyqt5 = []
+pyqt5-qt5 = []
+pyqt5-sip = []
+pyqtwebengine = []
+pyqtwebengine-qt5 = []
 pytest = []
 pytest-cov = []
 python-dateutil = []
+pythonnet = []
 pytz = []
+pywebview = []
 pyyaml = []
 pyyaml-env-tag = []
+qtpy = []
 regex = []
 requests = []
 ruff = []

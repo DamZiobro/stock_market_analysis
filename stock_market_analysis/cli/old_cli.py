@@ -21,7 +21,7 @@ from stock_market_analysis.src.stock_data_fetcher import (
     fetch_volume_analysis_data,
     fetch_volume_analysis_data_multiple_tickers,
 )
-from stock_market_analysis.src.utils import log_dataframe_pretty
+from stock_market_analysis.src.utils.utils import log_dataframe_pretty
 from stock_market_analysis.steps.dividendCaptureAnalysis import (
     get_dividend_capture_return,
 )

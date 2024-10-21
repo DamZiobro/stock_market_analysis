@@ -13,6 +13,9 @@ from tabulate import tabulate
 from stock_market_analysis.src.logger import logger
 
 
+EMPTY_DF = pd.DataFrame([])
+
+
 def log_dataframe_pretty(df: pd.DataFrame):
     """Pretty print pandas dataframe using tabulate."""
     table_string = tabulate(
@@ -78,5 +81,7 @@ def cache_to_pickle(cache_dir: Path) -> Callable:
 @cache_to_pickle(Path("/tmp/cache/yf_download"))  # noqa: S108
 def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
     """Download data from yahoo finance and store as pickled data."""
-    logger.info("Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs)
+    logger.info(
+        "Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs
+    )
     return yf.download(*args, **kwargs)

@@ -21,8 +21,8 @@ class BaseAnalysisService:
 
     indicator_service = TechnicalIndicators()
     data_provider = None  # must be overwritten in concrete classes
-    strategy = None  # must be overwritten in concrete classes
-    selected_indicators = None  # must be overwritten in concrete classes
+    strategies = None  # must be overwritten in concrete classes
+    selected_indicators = None  # could be overwritten in concrete classes
     columns_to_plot = None  # must be overwritten in concrete classes
 
     def analyze(self: Self, ticker: str, period: str) -> None:
@@ -32,11 +32,13 @@ class BaseAnalysisService:
         ----
             ticker (str): Stock ticker symbol
             output_format (str): Output format ('csv', 'json', 'plot')
-            selected_indicators (list): List of indicators to add (e.g., 'rsi', 'macd')
             period (str): Data period (e.g., '1y', '2023-01-01:2024-01-01')
         """
         # Fetch and prepare data
         data_df = self.data_provider.get_data(ticker, period)  # type: ignore
+        if data_df.empty:
+            return data_df
+
         data_df["Ticker"] = ticker
 
         # Apply technical indicators
@@ -44,8 +46,9 @@ class BaseAnalysisService:
             data_df, self.selected_indicators  # type: ignore
         )
 
-        # Apply strategy
-        self.strategy.apply(data_df)  # type: ignore
+        # Apply strategies
+        for strategy in self.strategies: # type: ignore
+            strategy.apply(data_df)  # type: ignore
 
         return data_df
 

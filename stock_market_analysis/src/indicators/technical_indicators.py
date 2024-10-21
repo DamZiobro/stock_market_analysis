@@ -1,5 +1,5 @@
 import sys
-from typing import TypeVar
+from typing import Optional, TypeVar
 
 import pandas as pd
 import ta
@@ -21,14 +21,28 @@ def macd(df: pd.DataFrame) -> pd.Series:
     """Calculate MACD data series."""
     ticker = df["Ticker"].iloc[0]
     logger.info("Calculating MACD for: %s", ticker)
-    return ta.trend.MACD(df["Close"]).macd()
+    return ta.trend.MACD(close=df["Close"]).macd()
+
+
+def macd_signal(df: pd.DataFrame) -> pd.Series:
+    """Calculate MACD signal line data."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating MACD for: %s", ticker)
+    return ta.trend.MACD(close=df["Close"]).macd_signal()
+
+
+def macd_hist(df: pd.DataFrame) -> pd.Series:
+    """Calculate MACD histogram data."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating MACD for: %s", ticker)
+    return ta.trend.MACD(close=df["Close"]).macd_diff()
 
 
 class TechnicalIndicators:
     """Applies selected technical indicators on stock data."""
 
     def add_indicators(
-        self: Self, df: pd.DataFrame, selected_indicators: list
+        self: Self, df: pd.DataFrame, selected_indicators: Optional[list] = None
     ) -> pd.DataFrame:
         """Add the selected technical indicators to the dataframe.
 
@@ -42,6 +56,9 @@ class TechnicalIndicators:
         -------
             pd.DataFrame: DataFrame with selected technical indicators
         """
+        if selected_indicators is None:
+            return df
+
         # Get all functions from the current module
         current_module = sys.modules[__name__]
         indicator_functions = {

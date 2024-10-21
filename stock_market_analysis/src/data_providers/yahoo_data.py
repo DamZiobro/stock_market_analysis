@@ -7,7 +7,7 @@ import yfinance as yf
 
 from stock_market_analysis.src.data_providers.base_provider import BaseDataProvider
 from stock_market_analysis.src.logger import logger
-from stock_market_analysis.src.utils.utils import cache_to_pickle
+from stock_market_analysis.src.utils.utils import EMPTY_DF, cache_to_pickle
 
 
 Self = TypeVar("Self", bound="YahooDataProvider")
@@ -33,9 +33,9 @@ def yf_download(ticker: str, period: str) -> pd.DataFrame:
     )
     if ":" in period:
         start, end = period.split(":")
-        data = yf.Ticker(ticker).history(start=start, end=end)
+        data = yf.download(ticker, start=start, end=end, progress=False)
     else:
-        data = yf.Ticker(ticker).history(period=period)
+        data = yf.download(ticker, period=period, progress=False)
 
     return data
 
@@ -43,7 +43,6 @@ def yf_download(ticker: str, period: str) -> pd.DataFrame:
 class YahooDataProvider(BaseDataProvider):
     """Fetches stock data from Yahoo Finance."""
 
-    @cache_to_pickle(Path("/tmp/cache/yf_download"))  # noqa: S108
     def get_data(self: Self, ticker: str, period: str) -> pd.DataFrame:
         """Fetch data for a single ticker within the specified period.
 
@@ -56,4 +55,13 @@ class YahooDataProvider(BaseDataProvider):
         -------
             Dict: Stock data as a dictionary
         """
-        return yf_download(ticker, period)
+        try:
+            return yf_download(ticker, period)
+        except Exception as ex:
+            logger.error(
+                "ERROR: cannot download data for ticker: %s; period: %s; msg: %s",
+                ticker,
+                period,
+                str(ex),
+            )
+            return EMPTY_DF

@@ -636,7 +636,13 @@ def fetch_macd_3_day_rule_backtesting_single(
     print("\nTransactions:")
     print(
         transaction_data[
-            ["Ticker", "Transaction", "Transaction_Price", "Shares", "Transaction_Value"]
+            [
+                "Ticker",
+                "Transaction",
+                "Transaction_Price",
+                "Shares",
+                "Transaction_Value",
+            ]
         ]
     )
 
@@ -661,7 +667,7 @@ def fetch_macd_3_day_rule_backtesting(
     tickers: List[constr(min_length=1)],  # type: ignore
     period: str = "1y",
     amount: int = 5000,
-    n_jobs: int = -1
+    n_jobs: int = -1,
 ) -> pd.DataFrame:
     """Perform volume analysis on multiple stock tickers in parallel.
 

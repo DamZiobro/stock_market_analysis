@@ -10,6 +10,7 @@ from joblib import Parallel, delayed
 from stock_market_analysis.src.analysis.filtering import FilterBy
 from stock_market_analysis.src.analysis.sorting import SortBy
 from stock_market_analysis.src.logger import logger
+from stock_market_analysis.src.services.bb_service import BBBaseService
 from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
 from stock_market_analysis.src.services.macd_service import MACDBaseService
 from stock_market_analysis.src.services.rsi_service import RSIBaseService
@@ -100,8 +101,8 @@ def analyze(  # noqa: PLR0913
         service_obj = MACDBaseService()  # type: ignore
     elif service == "MACD3DaysRSI":
         service_obj = MACD3DaysRSIService()  # type: ignore
-    # elif service == "BollingerBandsBase":
-    #     service_obj = BollingerBandsBaseService()  # type: ignore
+    elif service == "BBBase":
+        service_obj = BBBaseService()  # type: ignore
     else:
         msg = f"Unsupported service: {service}"
         raise ValueError(msg)

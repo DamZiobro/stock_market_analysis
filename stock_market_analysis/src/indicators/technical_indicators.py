@@ -38,6 +38,24 @@ def macd_hist(df: pd.DataFrame) -> pd.Series:
     return ta.trend.MACD(close=df["Close"]).macd_diff()
 
 
+def bb_upper(df: pd.DataFrame) -> pd.Series:
+    """Calculate MACD data series."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating BollingerBands Upper: %s", ticker)
+    return ta.volatility.BollingerBands(
+        close=df["Close"], window=20, window_dev=2
+    ).bollinger_hband()
+
+
+def bb_lower(df: pd.DataFrame) -> pd.Series:
+    """Calculate MACD data series."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating BollingerBands Lower: %s", ticker)
+    return ta.volatility.BollingerBands(
+        close=df["Close"], window=20, window_dev=2
+    ).bollinger_lband()
+
+
 class TechnicalIndicators:
     """Applies selected technical indicators on stock data."""
 

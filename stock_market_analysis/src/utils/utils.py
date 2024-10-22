@@ -85,3 +85,108 @@ def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
         "Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs
     )
     return yf.download(*args, **kwargs)
+
+
+def parse_sort_input(input_string: str | None) -> tuple[list[str], list[bool]]:
+    """Parse sort input into lists of columns and orders."""
+    if not input_string:
+        return [], []
+
+    column_specs = input_string.split(",")
+
+    columns = []
+    order_asc_column = []
+
+    for spec_orig in column_specs:
+        spec = spec_orig.strip()  # Remove any leading/trailing whitespace
+
+        if "[desc]" in spec:
+            columns.append(spec.replace("[desc]", ""))
+            order_asc_column.append(False)
+        elif "[asc]" in spec:
+            columns.append(spec.replace("[asc]", ""))
+            order_asc_column.append(True)
+        else:
+            columns.append(spec)
+            order_asc_column.append(True)  # Default to ascending if not specified
+
+    return columns, order_asc_column
+
+
+def parse_filters_input(input_string: str | None) -> dict:
+    """Parse input filters string into dict of filters."""
+    # Split the string into key-value pairs
+    if not input_string:
+        return {}
+
+    pairs = input_string.split(",")
+    result = {}  # type: ignore
+    for pair in pairs:
+        key, value = pair.split("=")
+        if key not in result:
+            result[key] = []
+        if value.startswith("NON_"):
+            result[key].append(("NON_", value))
+        else:
+            result[key].append(("IN", value))
+    return result
+
+
+def find_buy_signals(df: pd.DataFrame, n: int) -> list[tuple[str, pd.Timestamp]]:
+    """Find the oldest N 'buy' signals in the DataFrame.
+
+    Args:
+    ----
+    df (pd.DataFrame): Input DataFrame with 'ticker' and 'signal' columns.
+    n (int): Number of buy signals to find.
+
+    Returns:
+    -------
+    List[Tuple[str, pd.Timestamp]]: List of (ticker, date) tuples for buy signals.
+    """
+    print(df)
+    buy_signals = df[df["main_advice"] == "buy"].groupby("Ticker").first().reset_index()
+    print(buy_signals)
+    return list(buy_signals[["Ticker", "Date"]].itertuples(index=False, name=None))[:n]
+
+
+def execute_buy(
+    df: pd.DataFrame, ticker: str, date: pd.Timestamp, amount: float
+) -> dict[str, float]:
+    """Execute a buy transaction for a given ticker and date.
+
+    Args:
+    ----
+    df (pd.DataFrame): Input DataFrame.
+    ticker (str): Ticker symbol.
+    date (pd.Timestamp): Date of transaction.
+    amount (float): Amount to invest.
+
+    Returns:
+    -------
+    Dict[str, float]: Dictionary with 'hold_shares' and 'buy_amount'.
+    """
+    row = df[(df["Ticker"] == ticker) & (df["Date"] == date)].iloc[0]
+    shares = amount // row["Close"]
+    invested = shares * row["Close"]
+    return {"hold_shares": shares, "buy_amount": invested}
+
+
+def execute_sell(
+    df: pd.DataFrame, ticker: str, date: pd.Timestamp, shares: float
+) -> float:
+    """Execute a sell transaction for a given ticker and date.
+
+    Args:
+    ----
+    df (pd.DataFrame): Input DataFrame.
+    ticker (str): Ticker symbol.
+    date (pd.Timestamp): Date of transaction.
+    shares (float): Number of shares to sell.
+
+    Returns:
+    -------
+    float: Amount received from selling.
+    """
+    row = df[(df["Ticker"] == ticker) & (df["Date"] == date)].iloc[0]
+    return shares * row["Close"]

@@ -1,10 +1,10 @@
 from stock_market_analysis.src.data_providers.yahoo_data import YahooDataProvider
-from stock_market_analysis.src.services.rsi_analysis import RSIAnalysisService
+from stock_market_analysis.src.services.rsi_service import RSIBaseService
 
 
 def test_analyze_single_ticker_contains_close_price_and_ticker():
-    analysis_service = RSIAnalysisService()
-    data = analysis_service.analyze("AAPL", "1y")
+    analysis_service = RSIBaseService()
+    data = analysis_service.run("AAPL", "1y")
     assert "Close" in data
     assert "Ticker" in data
 

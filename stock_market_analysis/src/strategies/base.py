@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import TypeVar
 
 import pandas as pd
@@ -6,10 +7,9 @@ import pandas as pd
 Self = TypeVar("Self", bound="BaseStrategy")
 
 
-class BaseStrategy:
+class BaseStrategy(ABC):
     """Base class for strategies, allowing plug-in of different indicators."""
 
-    def apply(self: Self, data: pd.DataFrame):  # noqa: ARG002
+    @abstractmethod
+    def apply(self: Self, data: pd.DataFrame):
         """Apply strategy to the stock data."""
-        msg = "Strategy needs to implement 'apply' method."
-        raise NotImplementedError(msg)

@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, ClassVar, Optional, TypeVar
 
 import pandas as pd
 
@@ -21,11 +21,14 @@ class BaseAnalysisService:
 
     indicator_service = TechnicalIndicators()
     data_provider = None  # must be overwritten in concrete classes
-    strategies = None  # must be overwritten in concrete classes
-    selected_indicators = None  # could be overwritten in concrete classes
-    columns_to_plot = None  # must be overwritten in concrete classes
+    selected_indicators: ClassVar = []  # could be overwritten in concrete classes
+    pre_run_strategies: ClassVar = []  # could be overwritten in concrete classes
+    post_run_analysis_list: ClassVar = (
+        []
+    )  # could be overwritten in the concrete classes
+    columns_to_plot: ClassVar = []  # could be overwritten in concrete classes
 
-    def analyze(self: Self, ticker: str, period: str) -> None:
+    def run(self: Self, ticker: str, period: str) -> None:
         """Analyze a single stock ticker.
 
         Args:
@@ -47,9 +50,27 @@ class BaseAnalysisService:
         )
 
         # Apply strategies
-        for strategy in self.strategies: # type: ignore
+        for strategy in self.pre_run_strategies:  # type: ignore
             strategy.apply(data_df)  # type: ignore
 
+        return data_df
+
+    def post_run_analysis(self: Self, data_df: pd.DataFrame) -> pd.DataFrame:
+        """Trigger for post-run analysis. data_df contains data of all tickers."""
+        for analysis in self.post_run_analysis_list:  # type: ignore
+            data_df = analysis.apply(data_df)  # type: ignore
+        return data_df
+
+    def backtest(
+        self: Self,
+        data_df: pd.DataFrame,
+        backtest_amounts: Optional[list[int]] = [  # noqa: ARG002, B006
+            3000,
+            3000,
+            4000,
+        ],
+    ) -> pd.DataFrame:
+        """Backtest analysis."""
         return data_df
 
     def output_data(

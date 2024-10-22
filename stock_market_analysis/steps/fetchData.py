@@ -34,7 +34,7 @@ def handler(event: dict, context: dict) -> list:  # noqa: ARG001
     :param context: Lambda context.
     :return: JSON response.
     """
-    #TODO(damian): pass the BATCH_SIZE from serverless.yml vars  # noqa: TD003
+    #TODO(damian): pass the BATCH_SIZE from serverless.yml vars
     BATCH_SIZE = 20  # noqa: N806
 
     pwd = Path(__file__).parent.parent

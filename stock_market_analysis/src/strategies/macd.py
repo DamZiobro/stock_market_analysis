@@ -20,7 +20,7 @@ def find_and_apply_macd_days_signal(data: pd.DataFrame):
     """Retrieve Buy/Sell signal based on the MACD Days Rule."""
     data["macd_hist_diff"] = data["macd_hist"].diff()
 
-    data["macd_raw_signal"] = "neutral"
+    data["macd_advice"] = "neutral"
     # Buy signal: 3 consecutive days of negative but growing histogram values
     buy_condition = (
         (data["macd_hist"] < 0)
@@ -38,8 +38,8 @@ def find_and_apply_macd_days_signal(data: pd.DataFrame):
         & (data["macd_hist_diff"].shift(3) > 0)
     )
 
-    data.loc[buy_condition, "macd_raw_signal"] = "buy"
-    data.loc[sell_condition, "macd_raw_signal"] = "sell"
+    data.loc[buy_condition, "macd_advice"] = "buy"
+    data.loc[sell_condition, "macd_advice"] = "sell"
 
 
 class MACDDay3BuyDay3SellStrategy(BaseStrategy):

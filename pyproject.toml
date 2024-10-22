@@ -76,7 +76,7 @@ select = [
   "PD",   # pandas-vet
 ]
 
-ignore = ["D203", "D213", "ANN201", "D100"]
+ignore = ["D203", "D213", "ANN201", "D100", "TD003"]
 
 [tool.ruff.per-file-ignores]
 "*" = ["D417", "PD901"]

@@ -7,9 +7,13 @@ import click
 import pandas as pd
 from joblib import Parallel, delayed
 
+from stock_market_analysis.src.analysis.filtering import FilterBy
+from stock_market_analysis.src.analysis.sorting import SortBy
 from stock_market_analysis.src.logger import logger
-from stock_market_analysis.src.services.macd_analysis import MACDAnalysisService
-from stock_market_analysis.src.services.rsi_analysis import RSIAnalysisService
+from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
+from stock_market_analysis.src.services.macd_service import MACDBaseService
+from stock_market_analysis.src.services.rsi_service import RSIBaseService
+from stock_market_analysis.src.utils.utils import parse_filters_input, parse_sort_input
 
 
 PATH_TO_FTSE_CSV = "stock_market_analysis/data/ftse.csv"
@@ -41,9 +45,34 @@ def version():
 @click.option("--output", default="csv", help="Output format: csv, json, plot")
 @click.option("--save", default=False, help="Save output to file?")
 @click.option(
-    "--analysis",
-    default="RSIAnalysis",
+    "--service",
+    default="RSIBase",
     help="Selected technical analysis ex. RSIAnalysis",
+)
+@click.option(
+    "--limit",
+    default=100,
+    help="Limit maximum number of output rows.",
+)
+@click.option(
+    "--order-by",
+    default="",
+    help="Output data sorting order ex. 'Date[desc],macd,rsi'",
+)
+@click.option(
+    "--filters",
+    default="",
+    help="Filter by criteria. ex 'rsi_category=oversold,macd_raw_signal=buy'",
+)
+@click.option(
+    "--backtest",
+    default=False,
+    help="Should backtesting be triggered?",
+)
+@click.option(
+    "--backtest-amounts",
+    default="3000,3000,4000",
+    help="Amounts to initially by shares for backtesting.",
 )
 def analyze(  # noqa: PLR0913
     ticker: Optional[str],
@@ -51,7 +80,12 @@ def analyze(  # noqa: PLR0913
     period: Optional[str],
     output: Optional[str],
     save: Optional[bool],
-    analysis: Optional[str],
+    service: Optional[str],
+    limit: Optional[int],
+    order_by: Optional[str],
+    filters: Optional[str],
+    backtest: Optional[bool],
+    backtest_amounts: Optional[str],
 ):
     """CLI command to analyze stock based on ticker, output format, and period."""
     if ticker is not None:
@@ -60,23 +94,50 @@ def analyze(  # noqa: PLR0913
         tickers_df = pd.read_csv(file)
         tickers = tickers_df["Code"].tolist()
 
-    if analysis == "RSIAnalysis":
-        analysis_obj = RSIAnalysisService()  # type: ignore
-    elif analysis == "MACDAnalysis":
-        analysis_obj = MACDAnalysisService()  # type: ignore
+    if service == "RSIBase":
+        service_obj = RSIBaseService()  # type: ignore
+    elif service == "MACDBase":
+        service_obj = MACDBaseService()  # type: ignore
+    elif service == "MACD3DaysRSI":
+        service_obj = MACD3DaysRSIService()  # type: ignore
+    # elif service == "BollingerBandsBase":
+    #     service_obj = BollingerBandsBaseService()  # type: ignore
     else:
-        msg = f"Unsupported analysis: {analysis}"
+        msg = f"Unsupported service: {service}"
         raise ValueError(msg)
 
-    results = Parallel(n_jobs=-1)(
-        delayed(analysis_obj.analyze)(ticker, period) for ticker in tickers
+    # prepare filtering and sorting of output data
+    filters_dict = parse_filters_input(filters)
+    service_obj.post_run_analysis_list.append(FilterBy(filters=filters_dict))
+
+    sort_columns, sort_orders = parse_sort_input(order_by)
+    service_obj.post_run_analysis_list.append(
+        SortBy(columns=sort_columns, orders_asc=sort_orders)
     )
-    logger.info("Contactenating results of the analysis: %s", analysis)
+
+    results = Parallel(n_jobs=-1)(
+        delayed(service_obj.run)(ticker, period) for ticker in tickers
+    )
+    logger.info("Contactenating results of the service: %s", service)
     result_df = pd.concat(results)
+
+    logger.info("Triggering post-run service: %s", service)
+    result_df = service_obj.post_run_analysis(result_df)
+
+    if backtest and backtest_amounts:
+        logger.info("=========================================================")
+        logger.info(
+            "Triggering backtesting with initial amounts: %s", str(backtest_amounts)
+        )
+        limit = 10000000
+        int_amounts = [int(a) for a in backtest_amounts.split(",")]
+        result_df = service_obj.backtest(result_df, int_amounts)
 
     output_file = None
     if save:
         extension = "png" if output == "plot" else output
         output_file = f"{ticker}_rsi_analysis.{extension}"
-    logger.info("Outting data of the analysis: %s", analysis)
-    analysis_obj.output_data(result_df, output, output_file)  # type: ignore
+    logger.info("Outting data of the service (max_rows=%d): %s", limit, service)
+    # filter only selected 'limit' N number of rows
+    limited_df = result_df.tail(limit)
+    service_obj.output_data(limited_df, output, output_file)  # type: ignore

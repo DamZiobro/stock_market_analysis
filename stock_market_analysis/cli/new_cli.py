@@ -17,7 +17,7 @@ from stock_market_analysis.src.services.rsi_service import RSIBaseService
 from stock_market_analysis.src.utils.utils import parse_filters_input, parse_sort_input
 
 
-PATH_TO_FTSE_CSV = "stock_market_analysis/data/ftse.csv"
+PATH_TO_FTSE_CSV = "stock_market_analysis/data/all_uk_stocks.csv"
 
 
 @click.group()

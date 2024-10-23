@@ -38,7 +38,7 @@ def handler(event: dict, context: dict) -> list:  # noqa: ARG001
     BATCH_SIZE = 20  # noqa: N806
 
     pwd = Path(__file__).parent.parent
-    csv_file_path = pwd / "data" / "ftse.csv"
+    csv_file_path = pwd / "data" / "all_uk_stocks.csv"
     data = read_csv(csv_file_path)
     code_name_records = [item.dict() for item in data]
     return [

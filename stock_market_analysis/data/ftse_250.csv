@@ -1,0 +1,251 @@
+Code,Name,StockIndex
+STJ.L,St James's Place,FTSE 250
+HBR.L,Harbour Energy,FTSE 250
+BBOX.L,Tritax Big Box REIT,FTSE 250
+INVP.L,Investec,FTSE 250
+RS1.L,RS Group,FTSE 250
+PCT.L,Polar Capital Technology Trust,FTSE 250
+GAW.L,Games Workshop Group,FTSE 250
+BWY.L,Bellway,FTSE 250
+ATST.L,Alliance Trust,FTSE 250
+IGG.L,IG Group Holdings,FTSE 250
+OCDO.L,Ocado Group,FTSE 250
+IDS.L,International Distributions Services,FTSE 250
+BVIC.L,Britvic,FTSE 250
+UKW.L,Greencoat UK Wind,FTSE 250
+3IN.L,3i Infrastructure Ltd,FTSE 250
+INCH.L,Inchcape,FTSE 250
+SCT.L,Softcat,FTSE 250
+ITV.L,ITV,FTSE 250
+GRG.L,Greggs,FTSE 250
+ABDN.L,abrdn,FTSE 250
+ROR.L,Rotork,FTSE 250
+SHC.L,Shaftesbury Capital,FTSE 250
+JGGI.L,JPMorgan Global Growth & Income,FTSE 250
+CWK.L,Cranswick,FTSE 250
+CCC.L,Computacenter,FTSE 250
+JMAT.L,Johnson Matthey,FTSE 250
+TATE.L,Tate & Lyle,FTSE 250
+BPT.L,Bridgepoint Group,FTSE 250
+HICL.L,HICL Infrastructure,FTSE 250
+RSW.L,Renishaw,FTSE 250
+QQ.L,QinetiQ Group,FTSE 250
+DLN.L,Derwent London,FTSE 250
+RCP.L,RIT Capital Partners,FTSE 250
+SXS.L,Spectris,FTSE 250
+TRIG.L,The Renewables Infrastructure Group Ltd,FTSE 250
+EMG.L,Man Group,FTSE 250
+DRX.L,Drax Group,FTSE 250
+INPP.L,International Public Partnership Ltd,FTSE 250
+BAB.L,Babcock International Group,FTSE 250
+DNLM.L,Dunelm Group,FTSE 250
+MNKS.L,Monks Investment Trust,FTSE 250
+BRBY.L,Burberry Group,FTSE 250
+BYG.L,Big Yellow Group,FTSE 250
+DLG.L,Direct Line Insurance Group,FTSE 250
+PHLL.L,Petershill Partners,FTSE 250
+HGT.L,HgCapital Trust,FTSE 250
+PTEC.L,Playtech,FTSE 250
+BBY.L,Balfour Beatty,FTSE 250
+CTY.L,City of London Investment Trust,FTSE 250
+SSON.L,Smithson Investment Trust,FTSE 250
+GFTU.L,Grafton Group,FTSE 250
+CCL.L,Carnival,FTSE 250
+SAFE.L,Safestore Holdings,FTSE 250
+QLT.L,Quilter,FTSE 250
+TPK.L,Travis Perkins,FTSE 250
+SRP.L,Serco Group,FTSE 250
+PLUS.L,Plus500 Ltd,FTSE 250
+AJB.L,AJ Bell,FTSE 250
+SMWH.L,WH Smith,FTSE 250
+MRC.L,Mercantile Investment Trust,FTSE 250
+CLDN.L,Caledonia Investments,FTSE 250
+JAM.L,JPMorgan American Investment Trust,FTSE 250
+WWH.L,Worldwide Healthcare Trust,FTSE 250
+GRI.L,Grainger,FTSE 250
+TCAP.L,TP ICAP,FTSE 250
+HVPE.L,Harbourvest Global Private Equity Ltd,FTSE 250
+ITH.L,Ithaca Energy,FTSE 250
+IWG.L,International Workplace Group,FTSE 250
+JTC.L,JTC,FTSE 250
+BGEO.L,Bank of Georgia Group,FTSE 250
+CEY.L,Centamin,FTSE 250
+MAB.L,Mitchells & Butlers,FTSE 250
+RAT.L,Rathbone Brothers,FTSE 250
+ENOG.L,Energean,FTSE 250
+TEM.L,Templeton Emerging Markets Investment Trust,FTSE 250
+PNL.L,Personal Assets Trust,FTSE 250
+HILS.L,Hill & Smith Holdings,FTSE 250
+RHIM.L,RHI Magnesita NV,FTSE 250
+WTAN.L,Witan Investment Trust,FTSE 250
+PAG.L,Paragon Banking Group,FTSE 250
+PNN.L,Pennon Group,FTSE 250
+PFD.L,Premier Foods,FTSE 250
+HMSO.L,Hammerson,FTSE 250
+MYI.L,Murray International Trust,FTSE 250
+COA.L,Coats Group,FTSE 250
+SVS.L,Savills,FTSE 250
+FEV.L,Fidelity European Trust,FTSE 250
+PIN.L,Pantheon International,FTSE 250
+LRE.L,Lancashire Holdings Ltd,FTSE 250
+OSB.L,OSB Group,FTSE 250
+BCG.L,Baltic Classifieds Group,FTSE 250
+FOUR.L,4imprint Group,FTSE 250
+MTO.L,Mitie Group,FTSE 250
+MGNS.L,Morgan Sindall,FTSE 250
+JUST.L,Just Group,FTSE 250
+TRN.L,Trainline,FTSE 250
+BREE.L,Breedon Group,FTSE 250
+FGT.L,Finsbury Growth & Income Trust,FTSE 250
+TEP.L,Telecom plus,FTSE 250
+GNS.L,Genus,FTSE 250
+ATT.L,Allianz Technology Trust,FTSE 250
+PETS.L,Pets at Home Group,FTSE 250
+SRE.L,Sirius Real Estate Ltd,FTSE 250
+TBCG.L,TBC Bank Group,FTSE 250
+GPE.L,Great Portland Estates,FTSE 250
+HAS.L,Hays,FTSE 250
+PHP.L,Primary Health Properties,FTSE 250
+AGR.L,Assura,FTSE 250
+ASHM.L,Ashmore Group,FTSE 250
+SSPG.L,SSP Group,FTSE 250
+WIZZ.L,Wizz Air Holding,FTSE 250
+BHMG.L,BH Macro Ltd,FTSE 250
+BNKR.L,Bankers Investment Trust,FTSE 250
+ASL.L,Aberforth Smaller Companies Trust,FTSE 250
+SEQI.L,Sequoia Economic Infrastructure Income Fund Ltd,FTSE 250
+JMG.L,JPMorgan Emerging Markets Inv Trust,FTSE 250
+BYIT.L,Bytes Technology Group,FTSE 250
+FAN.L,Volution Group,FTSE 250
+WKP.L,Workspace Group,FTSE 250
+KLR.L,Keller Group,FTSE 250
+GEN.L,Genuit Group,FTSE 250
+PAGE.L,PageGroup,FTSE 250
+DOM.L,Domino's Pizza Group,FTSE 250
+IHP.L,IntegraFin Holdings,FTSE 250
+LWDB.L,Law Debenture Corp,FTSE 250
+ASCL.L,Ascential,FTSE 250
+OXIG.L,Oxford Instruments,FTSE 250
+FCSS.L,Fidelity China Special Situations,FTSE 250
+HTWS.L,Helios Towers,FTSE 250
+MONY.L,Mony Group,FTSE 250
+N91.L,Ninety One,FTSE 250
+WOSG.L,Watches Of Switzerland Group,FTSE 250
+VEIL.L,Vietnam Enterprise Investments Ltd,FTSE 250
+CKN.L,Clarkson,FTSE 250
+TRY.L,TR Property Investment Trust,FTSE 250
+HRI.L,Herald Investment Trust,FTSE 250
+EDIN.L,Edinburgh Investment Trust,FTSE 250
+FUTR.L,Future,FTSE 250
+BOY.L,Bodycote,FTSE 250
+KNOS.L,Kainos Group Ltd,FTSE 250
+AGT.L,AVI Global Trust,FTSE 250
+VSVS.L,Vesuvius,FTSE 250
+SPT.L,Spirent Communications,FTSE 250
+FSV.L,Fidelity Special Values,FTSE 250
+IEM.L,Impax Environmental Markets,FTSE 250
+CURY.L,Currys,FTSE 250
+CHG.L,Chemring Group,FTSE 250
+CGT.L,Capital Gearing Trust,FTSE 250
+BRWM.L,BlackRock World Mining Trust,FTSE 250
+RICA.L,Ruffer Investment Company Ltd,FTSE 250
+TRST.L,Trustpilot Group,FTSE 250
+HOC.L,Hochschild Mining,FTSE 250
+SPI.L,Spire Healthcare Group,FTSE 250
+SUPR.L,Supermarket Income Reit,FTSE 250
+AML.L,Aston Martin Lagonda Global Holdings,FTSE 250
+SAIN.L,Scottish American Investment Co,FTSE 250
+BBGI.L,Bilfinger Berger Global Infrastructure SICAV SA,FTSE 250
+ALPH.L,Alpha Group International,FTSE 250
+BAKK.L,Bakkavor Group,FTSE 250
+JDW.L,Wetherspoon (JD),FTSE 250
+GNC.L,Greencore Group,FTSE 250
+MUT.L,Murray Income Trust,FTSE 250
+ELM.L,Elementis,FTSE 250
+WG.L,Wood Group (John),FTSE 250
+MRCH.L,Merchants Trust,FTSE 250
+CMCX.L,CMC Markets,FTSE 250
+FGP.L,FirstGroup,FTSE 250
+ZIG.L,Zigup,FTSE 250
+PPET.L,Patria Private Equity Trust,FTSE 250
+MSLH.L,Marshalls,FTSE 250
+SDP.L,Schroder AsiaPacific Fund,FTSE 250
+HFG.L,Hilton Food Group,FTSE 250
+VCT.L,Victrex,FTSE 250
+TFIF.L,TwentyFour Income Fund Ltd,FTSE 250
+JFJ.L,JPMorgan Japanese Investment Trust,FTSE 250
+GSCT.L,Global Smaller Companies Trust,FTSE 250
+ICGT.L,ICG Enterprise Trust,FTSE 250
+TIFS.L,TI Fluid Systems,FTSE 250
+TMPL.L,Temple Bar Investment Trust,FTSE 250
+MGAM.L,Morgan Advanced Materials,FTSE 250
+MOON.L,Moonpig Group,FTSE 250
+DWL.L,Dowlais Group,FTSE 250
+MEGP.L,Me Group International,FTSE 250
+NBPE.L,NB Private Equity Partners Ltd,FTSE 250
+GROW.L,Molten Ventures,FTSE 250
+IBST.L,Ibstock,FTSE 250
+SYNC.L,Syncona Ltd,FTSE 250
+RPI.L,Raspberry Pi Holdings,FTSE 250
+VOF.L,VinaCapital Vietnam Opportunity Fund Ltd,FTSE 250
+ESCT.L,The European Smaller Companies Trust,FTSE 250
+JII.L,JPMorgan Indian Investment Trust,FTSE 250
+BAG.L,Barr (AG),FTSE 250
+APAX.L,APAX Global Alpha Ltd,FTSE 250
+DGN.L,Asia Dragon Trust,FTSE 250
+SEIT.L,SDCL Energy Efficiency Income Trust,FTSE 250
+BRSC.L,BlackRock Smaller Companies Trust,FTSE 250
+BCPT.L,Balanced Commercial Property Trust Ltd,FTSE 250
+BBH.L,Bellevue Healthcare Trust,FTSE 250
+GCP.L,GCP Infrastructure Investments Ltd,FTSE 250
+SOI.L,Schroder Oriental Income Fund Ltd,FTSE 250
+BGFD.L,Baillie Gifford Japan Trust,FTSE 250
+BSIF.L,Bluefield Solar Income Fund Ltd,FTSE 250
+HSL.L,Henderson Smaller Companies Investment Trust,FTSE 250
+XPS.L,XPS Pensions Group,FTSE 250
+AO.L,AO World,FTSE 250
+CCR.L,C&C Group,FTSE 250
+KIE.L,Kier Group,FTSE 250
+USA.L,Baillie Gifford US Growth Trust,FTSE 250
+ALFA.L,Alfa Financial Software Holdings,FTSE 250
+BUT.L,Brunner Investment Trust,FTSE 250
+HTG.L,Hunting,FTSE 250
+FSG.L,Foresight Group Holdings Ltd,FTSE 250
+EWI.L,Edinburgh Worldwide Investment Trust,FTSE 250
+HWG.L,Harworth Group,FTSE 250
+ESP.L,Empiric Student Property,FTSE 250
+HET.L,Henderson European Trust,FTSE 250
+SHED.L,Urban Logistics REIT,FTSE 250
+FGEN.L,Foresight Environmental Infrastructure Ltd,FTSE 250
+BRGE.L,BlackRock Greater Europe Investment Trust,FTSE 250
+DSCV.L,Discoverie Group,FTSE 250
+PRSR.L,PRS REIT,FTSE 250
+BMY.L,Bloomsbury Publishing,FTSE 250
+EBOX.L,Tritax Eurobox,FTSE 250
+CBG.L,Close Brothers Group,FTSE 250
+WPS.L,W.A.G Payment Solutions,FTSE 250
+JEDT.L,JPMorgan European Discovery Trust,FTSE 250
+THRL.L,Target Healthcare REIT Ltd,FTSE 250
+PHI.L,Pacific Horizon Investment Trust,FTSE 250
+EOT.L,European Opportunities Trust,FTSE 250
+THRG.L,Blackrock Throgmorton Trust,FTSE 250
+SNR.L,Senior,FTSE 250
+IPO.L,IP Group,FTSE 250
+PCFT.L,Polar Capital Global Financials Trust,FTSE 250
+GDWN.L,Goodwin,FTSE 250
+DOCS.L,Dr. Martens,FTSE 250
+BOWL.L,Hollywood Bowl Group,FTSE 250
+NCC.L,NCC Group,FTSE 250
+NAS.L,North Atlantic Smaller Companies Inv Trust,FTSE 250
+FEML.L,Fidelity Emerging Markets Ltd,FTSE 250
+FSFL.L,Foresight Solar Fund Ltd,FTSE 250
+RWI.L,Renewi,FTSE 250
+ATG.L,Auction Technology Group,FTSE 250
+STEM.L,SThree,FTSE 250
+PPH.L,PPHE Hotel Group Ltd,FTSE 250
+CRST.L,Crest Nicholson Holdings Ltd,FTSE 250
+NESF.L,NextEnergy Solar Fund Ltd,FTSE 250
+JUP.L,Jupiter Fund Management,FTSE 250
+ESNT.L,Essentra,FTSE 250
+PZC.L,PZ Cussons,FTSE 250
+PRTC.L,Puretech Health,FTSE 250

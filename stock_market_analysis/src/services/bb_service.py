@@ -16,8 +16,9 @@ class BBBaseService(BaseAnalysisService):
     post_run_analysis_list: ClassVar = [
         FilterBy(filters={"bb_signal": [("IN", "overupper|underlower")]}),
         SortBy(
-            columns=["Date", "bb_signal", "bb_diff_percent"],
+            columns=["Date", "bb_advice", "bb_diff_percent"],
             orders_asc=[True, True, True],
         ),
     ]  # type: ignore
+    backtest_main_advice_column: ClassVar = "bb_advice"  # type: ignore
     columns_to_plot: ClassVar = [*technical_indicators, "Close"]  # type: ignore

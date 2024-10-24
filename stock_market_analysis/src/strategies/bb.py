@@ -39,3 +39,7 @@ class BBOverupperUnderlowerStrategy(BaseStrategy):
             ),
             axis=1,
         )
+
+        data["bb_advice"] = "within_bb"
+        data.loc[data["Close"] < data["bb_lower"], "bb_advice"] = "buy"
+        data.loc[data["Close"] > data["bb_upper"], "bb_advice"] = "sell"

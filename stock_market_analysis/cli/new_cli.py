@@ -153,10 +153,12 @@ def analyze(  # noqa: PLR0913
         logger.info(
             "Triggering backtesting with initial amounts: %s", str(backtest_amounts)
         )
-        limit = 10000000
         int_amounts = [int(a) for a in backtest_amounts.split(",")]
-        max_stock_amount = sum(int_amounts)
-        backtest_service = BacktestService(result_df, int_amounts, max_stock_amount)
+        max_stock_amount = 5000
+        min_stock_amount = 2000
+        backtest_service = BacktestService(
+            result_df, int_amounts, max_stock_amount, min_stock_amount
+        )
         backtest_service.run()
 
         # Output the results

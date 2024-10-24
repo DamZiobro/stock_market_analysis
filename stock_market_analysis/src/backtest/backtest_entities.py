@@ -1,7 +1,5 @@
-from typing import Literal, Optional
-
 import pandas as pd
-from pydantic import BaseModel, Field, PositiveInt
+from pydantic import BaseModel, PositiveInt
 
 
 class TransactionLog(BaseModel):
@@ -12,11 +10,14 @@ class TransactionLog(BaseModel):
 
     date: pd.Timestamp
     ticker: str
-    transaction: Literal["buy", "sell"]
-    hold_shares_number: PositiveInt
+    transaction: str
+    close_price: float
+    hold_shares_number: int
     transaction_amount: float
-    yield_amount: Optional[float] = Field(0.0)
-    yield_percent: Optional[float] = Field(0.0)
+    available_cash: float
+    total_value: float
+    total_yield: float
+    total_yield_percent: float
 
 
 class Holding(BaseModel):

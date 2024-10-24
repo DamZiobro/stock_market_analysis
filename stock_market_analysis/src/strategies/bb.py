@@ -21,3 +21,21 @@ class BBOverupperUnderlowerStrategy(BaseStrategy):
         data["bb_signal"] = "within_bb"
         data.loc[data["Close"] < data["bb_lower"], "bb_signal"] = "underlower"
         data.loc[data["Close"] > data["bb_upper"], "bb_signal"] = "overupper"
+
+        # Create bb_diff column based on bb_signal
+        data["bb_diff_percent"] = 0.0
+        data.loc[data["bb_signal"] == "overupper", "bb_diff_percent"] = (
+            (data["Close"] - data["bb_upper"]) / data["Close"] * 100
+        )
+        data.loc[data["bb_signal"] == "underlower", "bb_diff_percent"] = (
+            (data["Close"] - data["bb_lower"]) / data["Close"] * 100
+        )
+        data.loc[data["bb_signal"] == "within_bb", "bb_diff_percent"] = data[
+            ["Close", "bb_upper", "bb_lower"]
+        ].apply(
+            lambda row: min(
+                abs(row["Close"] - row["bb_upper"]) / row["Close"] * 100,
+                abs(row["Close"] - row["bb_lower"]) / row["Close"] * 100,
+            ),
+            axis=1,
+        )

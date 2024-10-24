@@ -16,7 +16,7 @@ class BBBaseService(BaseAnalysisService):
     post_run_analysis_list: ClassVar = [
         FilterBy(filters={"bb_signal": [("IN", "overupper|underlower")]}),
         SortBy(
-            columns=["Date", "bb_signal", "bb_lower"],
+            columns=["Date", "bb_signal", "bb_diff_percent"],
             orders_asc=[True, True, True],
         ),
     ]  # type: ignore

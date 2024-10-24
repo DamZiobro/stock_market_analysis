@@ -9,6 +9,7 @@ from joblib import Parallel, delayed
 
 from stock_market_analysis.src.analysis.filtering import FilterBy
 from stock_market_analysis.src.analysis.sorting import SortBy
+from stock_market_analysis.src.backtest.backtest_service import BacktestService
 from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.services.bb_service import BBBaseService
 from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
@@ -89,11 +90,8 @@ def analyze(  # noqa: PLR0913
     backtest_amounts: Optional[str],
 ):
     """CLI command to analyze stock based on ticker, output format, and period."""
-    if ticker is not None:
-        tickers = [ticker]
-    else:
-        tickers_df = pd.read_csv(file)
-        tickers = tickers_df["Code"].tolist()
+    tickers_df = pd.read_csv(file)
+    tickers = [ticker] if ticker is not None else tickers_df["Ticker"].tolist()
 
     if service == "RSIBase":
         service_obj = RSIBaseService()  # type: ignore
@@ -122,8 +120,33 @@ def analyze(  # noqa: PLR0913
     logger.info("Contactenating results of the service: %s", service)
     result_df = pd.concat(results)
 
+    # add StockIndex to result_df
+    result_df = (
+        result_df.reset_index()
+        .merge(
+            tickers_df[["Ticker", "Stock_Index"]],
+            on="Ticker",
+            how="left",
+        )
+        .set_index("Date")
+    )
+
     logger.info("Triggering post-run service: %s", service)
     result_df = service_obj.post_run_analysis(result_df)
+
+    # convert datetime-based index into 'Date' column
+    result_df = result_df.reset_index().rename(columns={"index": "Date"})
+    result_df = result_df.reset_index(drop=True)
+
+    output_file = None
+    if save:
+        extension = "png" if output == "plot" else output
+        output_file = f"{ticker}_rsi_analysis.{extension}"
+    logger.info("Outting data of the service (max_rows=%d): %s", limit, service)
+
+    # filter only selected 'limit' N number of rows
+    limited_df = result_df.tail(limit)
+    service_obj.output_data(limited_df, output, output_file)  # type: ignore
 
     if backtest and backtest_amounts:
         logger.info("=========================================================")
@@ -132,13 +155,19 @@ def analyze(  # noqa: PLR0913
         )
         limit = 10000000
         int_amounts = [int(a) for a in backtest_amounts.split(",")]
-        result_df = service_obj.backtest(result_df, int_amounts)
+        max_stock_amount = sum(int_amounts)
+        backtest_service = BacktestService(result_df, int_amounts, max_stock_amount)
+        backtest_service.run()
 
-    output_file = None
-    if save:
-        extension = "png" if output == "plot" else output
-        output_file = f"{ticker}_rsi_analysis.{extension}"
-    logger.info("Outting data of the service (max_rows=%d): %s", limit, service)
-    # filter only selected 'limit' N number of rows
-    limited_df = result_df.tail(limit)
-    service_obj.output_data(limited_df, output, output_file)  # type: ignore
+        # Output the results
+        logger.info("=================================")
+        logger.info("BACKTEST LOG:")
+        backtest_df = backtest_service.get_backtest_log()
+        backtest_service.output_data(backtest_df, output, output_file)  # type: ignore
+
+        logger.info("=================================")
+        logger.info("PORTFOLIO VALUE:")
+        portfolio_df = backtest_service.get_portfolio()
+        backtest_service.output_data(portfolio_df, output, output_file)  # type: ignore
+        print("=================================")
+        return

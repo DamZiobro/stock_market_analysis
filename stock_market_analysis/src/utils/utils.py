@@ -132,61 +132,21 @@ def parse_filters_input(input_string: str | None) -> dict:
     return result
 
 
-def find_buy_signals(df: pd.DataFrame, n: int) -> list[tuple[str, pd.Timestamp]]:
-    """Find the oldest N 'buy' signals in the DataFrame.
+def check_columns_exist_in_df(df: pd.DataFrame, required_columns: list) -> None:
+    """Check if all required columns exist in the DataFrame.
 
     Args:
     ----
-    df (pd.DataFrame): Input DataFrame with 'ticker' and 'signal' columns.
-    n (int): Number of buy signals to find.
+    df (pd.DataFrame): The DataFrame to check.
+    required_columns (list): List of column names to check for.
 
-    Returns:
-    -------
-    List[Tuple[str, pd.Timestamp]]: List of (ticker, date) tuples for buy signals.
+    Raises:
+    ------
+    ValueError: If any of the required columns are missing from the DataFrame.
     """
-    print(df)
-    buy_signals = df[df["main_advice"] == "buy"].groupby("Ticker").first().reset_index()
-    print(buy_signals)
-    return list(buy_signals[["Ticker", "Date"]].itertuples(index=False, name=None))[:n]
+    missing_columns = [col for col in required_columns if col not in df.columns]
 
-
-def execute_buy(
-    df: pd.DataFrame, ticker: str, date: pd.Timestamp, amount: float
-) -> dict[str, float]:
-    """Execute a buy transaction for a given ticker and date.
-
-    Args:
-    ----
-    df (pd.DataFrame): Input DataFrame.
-    ticker (str): Ticker symbol.
-    date (pd.Timestamp): Date of transaction.
-    amount (float): Amount to invest.
-
-    Returns:
-    -------
-    Dict[str, float]: Dictionary with 'hold_shares' and 'buy_amount'.
-    """
-    row = df[(df["Ticker"] == ticker) & (df["Date"] == date)].iloc[0]
-    shares = amount // row["Close"]
-    invested = shares * row["Close"]
-    return {"hold_shares": shares, "buy_amount": invested}
-
-
-def execute_sell(
-    df: pd.DataFrame, ticker: str, date: pd.Timestamp, shares: float
-) -> float:
-    """Execute a sell transaction for a given ticker and date.
-
-    Args:
-    ----
-    df (pd.DataFrame): Input DataFrame.
-    ticker (str): Ticker symbol.
-    date (pd.Timestamp): Date of transaction.
-    shares (float): Number of shares to sell.
-
-    Returns:
-    -------
-    float: Amount received from selling.
-    """
-    row = df[(df["Ticker"] == ticker) & (df["Date"] == date)].iloc[0]
-    return shares * row["Close"]
+    if missing_columns:
+        missing_cols_str = ", ".join(missing_columns)
+        msg = f"The following required columns are missing from the DataFrame: {missing_cols_str}"
+        raise ValueError(msg)

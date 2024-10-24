@@ -26,6 +26,7 @@ class BaseAnalysisService:
     post_run_analysis_list: ClassVar = (
         []
     )  # could be overwritten in the concrete classes
+    backtest_main_advice_column = None  # could be overwritten in the concrete classes
     columns_to_plot: ClassVar = []  # could be overwritten in concrete classes
 
     def run(self: Self, ticker: str, period: str) -> None:
@@ -59,18 +60,11 @@ class BaseAnalysisService:
         """Trigger for post-run analysis. data_df contains data of all tickers."""
         for analysis in self.post_run_analysis_list:  # type: ignore
             data_df = analysis.apply(data_df)  # type: ignore
-        return data_df
 
-    def backtest(
-        self: Self,
-        data_df: pd.DataFrame,
-        backtest_amounts: Optional[list[int]] = [  # noqa: ARG002, B006
-            3000,
-            3000,
-            4000,
-        ],
-    ) -> pd.DataFrame:
-        """Backtest analysis."""
+        # set 'main_advice' column for backtesting
+        if self.backtest_main_advice_column:
+            data_df["main_advice"] = data_df[self.backtest_main_advice_column]
+
         return data_df
 
     def output_data(

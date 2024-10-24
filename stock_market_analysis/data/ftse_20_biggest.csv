@@ -1,21 +1,21 @@
-Code,Name,StockIndex
-AZN.L,AstraZeneca,FTSE 100
-SHEL.L,Shell,FTSE 100
-HSBA.L,HSBC Holdings,FTSE 100
-ULVR.L,Unilever,FTSE 100
+Ticker,Company_Name,Stock_Index
+AZN.L,AstraZeneca,FTSE_100
+SHEL.L,Shell,FTSE_100
+HSBA.L,HSBC Holdings,FTSE_100
+ULVR.L,Unilever,FTSE_100
 BHP.L,BHP Group Ltd,
-REL.L,RELX,FTSE 100
-BP.L,BP,FTSE 100
-RIO.L,Rio Tinto,FTSE 100
-BATS.L,British American Tobacco,FTSE 100
-GSK.L,GSK,FTSE 100
-DGE.L,Diageo,FTSE 100
-LSEG.L,London Stock Exchange Group,FTSE 100
-GLEN.L,Glencore,FTSE 100
-NG.L,National Grid,FTSE 100
-RR.L,Rolls-Royce Group,FTSE 100
-CPG.L,Compass Group,FTSE 100
-BA.L,BAE Systems,FTSE 100
-LLOY.L,Lloyds Banking Group,FTSE 100
-EXPN.L,Experian,FTSE 100
-HLN.L,Haleon,FTSE 100
+REL.L,RELX,FTSE_100
+BP.L,BP,FTSE_100
+RIO.L,Rio Tinto,FTSE_100
+BATS.L,British American Tobacco,FTSE_100
+GSK.L,GSK,FTSE_100
+DGE.L,Diageo,FTSE_100
+LSEG.L,London Stock Exchange Group,FTSE_100
+GLEN.L,Glencore,FTSE_100
+NG.L,National Grid,FTSE_100
+RR.L,Rolls-Royce Group,FTSE_100
+CPG.L,Compass Group,FTSE_100
+BA.L,BAE Systems,FTSE_100
+LLOY.L,Lloyds Banking Group,FTSE_100
+EXPN.L,Experian,FTSE_100
+HLN.L,Haleon,FTSE_100

@@ -27,7 +27,6 @@ def find_and_apply_macd_days_signal(data: pd.DataFrame):
         & (data["macd_hist_diff"] > 0)
         & (data["macd_hist_diff"].shift(1) > 0)
         & (data["macd_hist_diff"].shift(2) > 0)
-        & (data["macd_hist_diff"].shift(3) < 0)
     )
 
     # Sell signal: 3 consecutive days of declining histogram values (regardless of sign)
@@ -35,7 +34,6 @@ def find_and_apply_macd_days_signal(data: pd.DataFrame):
         (data["macd_hist_diff"] < 0)
         & (data["macd_hist_diff"].shift(1) < 0)
         & (data["macd_hist_diff"].shift(2) < 0)
-        & (data["macd_hist_diff"].shift(3) > 0)
     )
 
     data.loc[buy_condition, "macd_advice"] = "buy"

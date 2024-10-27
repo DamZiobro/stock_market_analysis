@@ -11,6 +11,7 @@ from stock_market_analysis.src.analysis.filtering import FilterBy
 from stock_market_analysis.src.analysis.sorting import SortBy
 from stock_market_analysis.src.backtest.backtest_service import BacktestService
 from stock_market_analysis.src.logger import logger
+from stock_market_analysis.src.services.bb_rsi_service import BBAndRSIAndMAService
 from stock_market_analysis.src.services.bb_service import BBBaseService
 from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
 from stock_market_analysis.src.services.macd_service import MACDBaseService
@@ -18,7 +19,7 @@ from stock_market_analysis.src.services.rsi_service import RSIBaseService
 from stock_market_analysis.src.utils.utils import parse_filters_input, parse_sort_input
 
 
-PATH_TO_FTSE_CSV = "stock_market_analysis/data/all_uk_stocks.csv"
+PATH_TO_FTSE_CSV = "stock_market_analysis/data/all_uk_indexed.csv"
 
 
 @click.group()
@@ -64,7 +65,7 @@ def version():
 @click.option(
     "--filters",
     default="",
-    help="Filter by criteria. ex 'rsi_category=oversold,macd_raw_signal=buy'",
+    help="Filter by criteria. ex 'rsi_meaning=oversold,macd_raw_signal=buy'",
 )
 @click.option(
     "--backtest",
@@ -73,10 +74,10 @@ def version():
 )
 @click.option(
     "--backtest-amounts",
-    default="3000,3000,4000",
+    default="4000,4000,3000,3000,3000,3000",
     help="Amounts to initially by shares for backtesting.",
 )
-def analyze(  # noqa: PLR0913
+def analyze(  # noqa: PLR0913, PLR0915
     ticker: Optional[str],
     file: Optional[click.Path],
     period: Optional[str],
@@ -90,8 +91,23 @@ def analyze(  # noqa: PLR0913
     backtest_amounts: Optional[str],
 ):
     """CLI command to analyze stock based on ticker, output format, and period."""
+    filters_dict = parse_filters_input(filters)
+
     tickers_df = pd.read_csv(file)
+
+    # if filters can be apply before analysis (ex. filters based on CSV columns),
+    # apply them to save analysis time
+    before_analysis_filters = {
+        key: filters_dict[key] for key in tickers_df.columns if key in filters_dict
+    }
+    print(f"{before_analysis_filters=}")
+    tickers_df = FilterBy(filters=before_analysis_filters).apply(tickers_df)
+
     tickers = [ticker] if ticker is not None else tickers_df["Ticker"].tolist()
+
+    if not tickers:
+        msg = "Input filtering criteria selected 0 tickers to analyse."
+        raise ValueError(msg)
 
     if service == "RSIBase":
         service_obj = RSIBaseService()  # type: ignore
@@ -101,12 +117,13 @@ def analyze(  # noqa: PLR0913
         service_obj = MACD3DaysRSIService()  # type: ignore
     elif service == "BBBase":
         service_obj = BBBaseService()  # type: ignore
+    elif service == "BBAndRSI":
+        service_obj = BBAndRSIAndMAService()  # type: ignore
     else:
         msg = f"Unsupported service: {service}"
         raise ValueError(msg)
 
     # prepare filtering and sorting of output data
-    filters_dict = parse_filters_input(filters)
     service_obj.post_run_analysis_list.append(FilterBy(filters=filters_dict))
 
     sort_columns, sort_orders = parse_sort_input(order_by)
@@ -151,13 +168,15 @@ def analyze(  # noqa: PLR0913
     if backtest and backtest_amounts:
         logger.info("=========================================================")
         logger.info(
-            "Triggering backtesting with initial amounts: %s", str(backtest_amounts)
+            "Triggering backtesting with initial amounts: %s and period: %s",
+            str(backtest_amounts),
+            period,
         )
         int_amounts = [int(a) for a in backtest_amounts.split(",")]
         max_stock_amount = 5000
         min_stock_amount = 2000
         backtest_service = BacktestService(
-            result_df, int_amounts, max_stock_amount, min_stock_amount
+            result_df, int_amounts, max_stock_amount, min_stock_amount, period
         )
         backtest_service.run()
 

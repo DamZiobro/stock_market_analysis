@@ -23,7 +23,7 @@ class MACD3DaysRSIService(BaseAnalysisService):
     post_run_analysis_list: ClassVar = [
         FilterBy(filters={"macd_advice": [("IN", "sell|buy")]}),
         SortBy(
-            columns=["Date", "macd_advice", "rsi_category", "macd_hist_diff", "Ticker"],
+            columns=["Date", "macd_advice", "rsi_meaning", "macd_hist_diff", "Ticker"],
             orders_asc=[True, False, False, True, True],
         ),
     ]  # type: ignore

@@ -55,6 +55,11 @@ def bb_lower(df: pd.DataFrame) -> pd.Series:
         close=df["Close"], window=20, window_dev=2
     ).bollinger_lband()
 
+def moving_average(df: pd.DataFrame, window: int) -> pd.Series:
+    """Calculate moving average data."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating Moving Average for: %s with window: %d", ticker, window)
+    return df["Close"].rolling(window=window).mean()
 
 class TechnicalIndicators:
     """Applies selected technical indicators on stock data."""

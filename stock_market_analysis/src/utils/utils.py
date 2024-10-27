@@ -1,6 +1,8 @@
 """Helper functions."""
 
+import inspect
 import pickle
+from datetime import datetime, timedelta
 from functools import wraps
 from hashlib import sha256
 from pathlib import Path
@@ -51,7 +53,7 @@ def cache_to_pickle(cache_dir: Path) -> Callable:
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
-        def wrapper(*args: list[any], **kwargs: dict[str, any]) -> any:  # type: ignore
+        def wrapper(*args: list[Any], **kwargs: dict) -> any:  # type: ignore
             # Create a unique cache key based on the function name and arguments
             cache_key = sha256(
                 (func.__name__ + str(args) + str(kwargs)).encode()
@@ -150,3 +152,80 @@ def check_columns_exist_in_df(df: pd.DataFrame, required_columns: list) -> None:
         missing_cols_str = ", ".join(missing_columns)
         msg = f"The following required columns are missing from the DataFrame: {missing_cols_str}"
         raise ValueError(msg)
+
+
+def get_class_init_params(obj: Any):  # noqa: ANN401
+    """Get class name and class init params based on it's object."""
+    # Get the __init__ method signature
+    signature = inspect.signature(obj.__class__.__init__)
+
+    # Get all attributes of the object
+    attributes = {
+        name: getattr(obj, name)
+        for name in dir(obj)
+        if not name.startswith("__") and not callable(getattr(obj, name))
+    }
+
+    params = {}
+    for name, _param in signature.parameters.items():
+        if name == "self":
+            continue
+        if name == "args":
+            if hasattr(obj, "args"):
+                params["*args"] = obj.args
+        elif name == "kwargs":
+            if hasattr(obj, "kwargs"):
+                params["**kwargs"] = obj.kwargs
+        else:
+            params[name] = attributes.get(name, "<not set or not accessible>")
+
+    return obj.__class__.__name__, params
+
+
+def get_date_range(date_input: str):
+    """Get date range from yf.download-like period."""
+    if ":" in date_input:
+        start_date_str, end_date_str = date_input.split(":")
+        return start_date_str, end_date_str  # Already in string format
+
+    end_date = datetime.now()  # noqa: DTZ005
+    if date_input.endswith("d"):
+        days = int(date_input[:-1])
+        start_date = end_date - timedelta(days=days)
+    elif date_input.endswith("mo"):
+        months = int(date_input[:-2])
+        start_date = end_date - pd.DateOffset(months=months)
+    elif date_input.endswith("y"):
+        years = int(date_input[:-1])
+        start_date = end_date - pd.DateOffset(years=years)
+    else:
+        msg = "Invalid date format"
+        raise ValueError(msg)
+
+    # Convert to string format
+    start_date_str = start_date.strftime("%Y-%m-%d")
+    end_date_str = end_date.strftime("%Y-%m-%d")
+
+    return start_date_str, end_date_str
+
+
+def inject_missing_dates(df: pd.DataFrame, period: str) -> pd.DataFrame:
+    """Inject missing dates into dataframe for full backtesting."""
+    start_date, end_date = get_date_range(period)
+    # Add an index to preserve original order, prioritizing the 'Date' column
+    df["OriginalIndex"] = range(len(df))
+
+    # Generate full date range
+    full_dates = pd.date_range(start=start_date, end=end_date)
+
+    # Create a DataFrame with all dates in range but no sorting
+    missing_dates = pd.DataFrame({"Date": full_dates})
+
+    # Merge with the original DataFrame, keeping the original rows in place
+    merged_df = missing_dates.merge(df, on="Date", how="left")
+
+    # Sort by 'OriginalIndex' and drop the helper column
+    merged_df = merged_df.sort_values(by=["Date", "OriginalIndex"], na_position="last")
+    merged_df = merged_df.drop(columns=["OriginalIndex"])
+
+    return merged_df.reset_index(drop=True)

@@ -4,7 +4,7 @@ from stock_market_analysis.steps.fetchData import CSVData, read_csv
 
 
 def test_read_csv():
-    test_path = FilePath("stock_market_analysis/data/all_uk_stocks.csv")
+    test_path = FilePath("stock_market_analysis/data/all_uk_indexed.csv")
     data = read_csv(test_path)
     assert len(data) > 0, "Should return non-empty list"
     assert all(

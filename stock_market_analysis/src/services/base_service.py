@@ -5,8 +5,10 @@ import pandas as pd
 from stock_market_analysis.src.indicators.technical_indicators import (
     TechnicalIndicators,
 )
+from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.output.csv_output import CSVOutput
 from stock_market_analysis.src.output.plot_output import PlotOutput
+from stock_market_analysis.src.utils.utils import get_class_init_params
 
 
 if TYPE_CHECKING:
@@ -56,6 +58,33 @@ class BaseAnalysisService:
 
         return data_df
 
+    def _print_all_analysis_report(self: Self, data_df: pd.DataFrame) -> None:
+        """Print final report after each analysis."""
+        logger.info("=========================================================")
+        logger.info("                    SERVICE REPORT")
+        logger.info("=========================================================")
+        logger.info("  SERVICE: %s", self.__class__.__name__)
+        logger.info("  APPLIED STRATEGIES:")
+        for strategy in self.pre_run_strategies:  # type: ignore
+            cls_name, init_params = get_class_init_params(strategy)
+            logger.info(f"      - {cls_name}({init_params})")
+        logger.info("  APPLIED POST_RUN_ANAYSIS:")
+        for analysis in self.post_run_analysis_list:  # type: ignore
+            cls_name, init_params = get_class_init_params(analysis)
+            logger.info(f"      - {cls_name}({init_params})")
+        logger.info("  NUMBER OF FILTERED OUT ROWS: %d", len(data_df))
+        logger.info(
+            "  BACKTEST MAIN_ADVICE COLUMN: %s", self.backtest_main_advice_column
+        )
+        logger.info("=========================================================")
+
+    def _set_main_advice_column(self: Self, data_df: pd.DataFrame) -> pd.DataFrame:
+        """Set 'main_advice' column needed for backtesting.
+
+        Function could be overwritten in concrete service classes.
+        """
+        return data_df
+
     def post_run_analysis(self: Self, data_df: pd.DataFrame) -> pd.DataFrame:
         """Trigger for post-run analysis. data_df contains data of all tickers."""
         for analysis in self.post_run_analysis_list:  # type: ignore
@@ -64,7 +93,10 @@ class BaseAnalysisService:
         # set 'main_advice' column for backtesting
         if self.backtest_main_advice_column:
             data_df["main_advice"] = data_df[self.backtest_main_advice_column]
+        else:
+            self._set_main_advice_column(data_df)
 
+        self._print_all_analysis_report(data_df)
         return data_df
 
     def output_data(

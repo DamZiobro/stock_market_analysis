@@ -14,7 +14,7 @@ class BBBaseService(BaseAnalysisService):
     technical_indicators: ClassVar = ["bb_upper", "bb_lower"]  # type: ignore
     pre_run_strategies: ClassVar = [BBOverupperUnderlowerStrategy()]  # type: ignore
     post_run_analysis_list: ClassVar = [
-        FilterBy(filters={"bb_signal": [("IN", "overupper|underlower")]}),
+        FilterBy(filters={"bb_meaning": [("IN", "overupper|underlower")]}),
         SortBy(
             columns=["Date", "bb_advice", "bb_diff_percent"],
             orders_asc=[True, True, True],

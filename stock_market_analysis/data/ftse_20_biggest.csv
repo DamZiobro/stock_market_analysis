@@ -1,20 +1,21 @@
-Code,Name
-SHEL.L,Shell
-AZN.L,AstraZeneca
-HSBA.L,HSBC Holdings
-BHP.L,BHP Group Ltd
-ULVR.L,Unilever
-BP.L,BP
-GSK.L,GSK
-RIO.L,Rio Tinto
-BNC.L,Banco Santander SA
-REL.L,RELX
-DGE.L,Diageo
-GLEN.L,Glencore
-BATS.L,British American Tobacco
-LSEG.L,London Stock Exchange Group
-CRH.L,CRH
-BA.L,BAE Systems
-NG.L,National Grid
-CPG.L,Compass Group
-RR.L,Rolls-Royce Group
+Ticker,Company_Name,Stock_Index
+AZN.L,AstraZeneca,FTSE_100
+SHEL.L,Shell,FTSE_100
+HSBA.L,HSBC Holdings,FTSE_100
+ULVR.L,Unilever,FTSE_100
+BHP.L,BHP Group Ltd,
+REL.L,RELX,FTSE_100
+BP.L,BP,FTSE_100
+RIO.L,Rio Tinto,FTSE_100
+BATS.L,British American Tobacco,FTSE_100
+GSK.L,GSK,FTSE_100
+DGE.L,Diageo,FTSE_100
+LSEG.L,London Stock Exchange Group,FTSE_100
+GLEN.L,Glencore,FTSE_100
+NG.L,National Grid,FTSE_100
+RR.L,Rolls-Royce Group,FTSE_100
+CPG.L,Compass Group,FTSE_100
+BA.L,BAE Systems,FTSE_100
+LLOY.L,Lloyds Banking Group,FTSE_100
+EXPN.L,Experian,FTSE_100
+HLN.L,Haleon,FTSE_100

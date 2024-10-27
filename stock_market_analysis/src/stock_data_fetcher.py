@@ -1,17 +1,20 @@
 """Fetching data from yahoo finance."""
 
+import math
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
 import pandas as pd
+import ta
 import yfinance as yf
 from joblib import Parallel, delayed
 from pydantic import NonNegativeInt, constr
 from yfinance import Ticker
 
-from stock_market_analysis.src.utils import cache_to_pickle
+from stock_market_analysis.src.logger import logger
+from stock_market_analysis.src.utils.utils import cache_to_pickle, yf_download
 
 
 def fetch_close_prices(ticker: str, days: int = 15) -> List[float]:
@@ -55,7 +58,7 @@ def fetch_close_price(ticker: str, date: datetime) -> Optional[float]:
 
     start_date = date - timedelta(days=1)
     end_date = date + timedelta(days=1)
-    data = yf.download(
+    data = yf_download(
         ticker, start=start_date.strftime("%Y-%m-%d"), end=end_date.strftime("%Y-%m-%d")
     )
     ticker_obj = Ticker(ticker)
@@ -67,7 +70,7 @@ def fetch_close_price(ticker: str, date: datetime) -> Optional[float]:
         return None
 
 
-@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
+@cache_to_pickle(Path("/tmp/cache/dividends"))  # noqa: S108
 def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFrame]:
     """Fetch the historical dividend data for a given stock ticker.
 
@@ -105,7 +108,7 @@ def fetch_historic_dividends(ticker: str, limit: int = 10) -> Optional[pd.DataFr
     ) + pd.Timedelta(days=1)
 
     all_dates = dividends["Ex-Date"].tolist() + dividends["Day Before Ex-Date"].tolist()
-    prices = yf.download(
+    prices = yf_download(
         ticker,
         start=min(all_dates) - timedelta(days=60),
         end=max(all_dates) + timedelta(days=1),
@@ -173,7 +176,224 @@ def calculate_moving_average(data: pd.DataFrame, window: int) -> pd.DataFrame:
     return data
 
 
-@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
+def calculate_rsi(data: pd.DataFrame, window: Optional[int] = 14):
+    """Calculate the Relative Strength Index (RSI).
+
+    Args:
+    ----
+        data (pd.DataFrame): DataFrame containing list of List of stock prices.
+
+    Returns:
+    -------
+        float: RSI value.
+    """
+    delta = data["Adj Close"].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
+
+
+def calculate_macd(
+    data: pd.DataFrame,
+    short_window: Optional[int] = 12,
+    long_window: Optional[int] = 26,
+    signal_window: Optional[int] = 9,
+):
+    """Calculate the MACD (Moving Average Convergence Divergence).
+
+    Args:
+    ----
+        data (pd.DataFrame): DataFrame containing list of List of stock prices.
+        short_window (int): short window of MACD calculation
+        long_window (int): long window of MACD calculation
+        singal_window (int): signal window of MACD calculation
+
+    Returns:
+    -------
+        float: MACD value.
+    """
+    short_ema = data["Adj Close"].ewm(span=short_window, adjust=False).mean()
+    long_ema = data["Adj Close"].ewm(span=long_window, adjust=False).mean()
+    macd = short_ema - long_ema
+    signal = macd.ewm(span=signal_window, adjust=False).mean()
+    macd_diff = macd - signal
+    return macd, signal, macd_diff
+
+
+def calculate_bollinger_bands(
+    data: pd.DataFrame, window: Optional[int] = 20, num_std: Optional[int] = 2
+):
+    """Calculate Bollinger Bands.
+
+    Args:
+    ----
+        data (pd.DataFrame): DataFrame containing list of List of stock prices.
+        window (int): window of Bollinger Brands calculation
+        num_std (int): num_std of Bolinger Brands calculation
+
+    Returns:
+    -------
+        float: Bollinger Bands value.
+    """
+    rolling_mean = data["Adj Close"].rolling(window=window).mean()
+    rolling_std = data["Adj Close"].rolling(window=window).std()
+    upper_band = rolling_mean + (rolling_std * num_std)
+    lower_band = rolling_mean - (rolling_std * num_std)
+    return upper_band, lower_band
+
+
+# @cache_to_pickle(Path("/tmp/cache/momentum"))
+def fetch_momentum_analysis_single(
+    ticker: str, lookback_days: int = 10, lookup_yield: float = 5.0
+):
+    """Perform an enhanced momentum analysis using various technical indicators.
+
+    to calculate the probability of a 5% price gain over the next 10 days after a
+    momentum signal is detected.
+
+    The function fetches stock data for the last 6 months and calculates several
+    technical indicators: Relative Strength Index (RSI), Moving Averages (MA),
+    MACD, and Bollinger Bands. Based on these indicators, a momentum signal is
+    generated. The function then performs a historical analysis to determine how
+    often a momentum signal led to a 5% gain in the next 10 days.
+
+    Args:
+    ----
+        ticker (str): The stock symbol to analyze (e.g., 'AAPL').
+        lookback_days (int, optional): The number of days to look ahead when checking for
+                                  price gains. Defaults to 10.
+        lookup_yield (float, optional): yield of probablitity we look for. Defaults to 5.
+
+    Returns:
+    -------
+        float: The probability (in percentage) of achieving a 5% price gain within
+               10 days after a momentum signal.
+
+    Raises:
+    ------
+        ValueError: If the stock data cannot be fetched or if the calculations fail.
+    """
+    oversold_signal_rsi = 30  # oversold RSI (< 30) are a BUY SIGNAL
+    # Fetch stock data
+    stock_data = yf_download(ticker, period="6mo", interval="1d")
+
+    # Calculate RSI (Relative Strength Index)
+    rsi_df = calculate_rsi(stock_data)
+    stock_data["RSI"] = rsi_df
+
+    recent_rsi = None
+    if len(rsi_df) > 1:
+        recent_rsi = rsi_df.iloc[-1]
+        print(recent_rsi)
+
+    # Calculate short-term and long-term Moving Averages
+    stock_data["MA_10"] = stock_data["Adj Close"].rolling(window=10).mean()
+    stock_data["MA_50"] = stock_data["Adj Close"].rolling(window=50).mean()
+
+    # Calculate MACD (Moving Average Convergence Divergence)
+    stock_data["MACD"], stock_data["Signal"], stock_data["MACD_Diff"] = calculate_macd(
+        stock_data
+    )
+
+    # Calculate Bollinger Bands
+    stock_data["Upper_Band"], stock_data["Lower_Band"] = calculate_bollinger_bands(
+        stock_data
+    )
+
+    # Define momentum signals
+    stock_data["Momentum Signal"] = np.where(
+        (stock_data["RSI"] < oversold_signal_rsi),
+        # & (stock_data["MA_10"] > stock_data["MA_50"]),
+        # & (stock_data["MACD_Diff"] > 0)
+        # & (stock_data["Adj Close"] < stock_data["Lower_Band"]),
+        1,
+        0,
+    )
+
+    # Historical analysis: Check how often a momentum signal led to 5% gain in next 10 days
+    win_count = 0
+    signal_count = 0
+
+    for i in range(len(stock_data) - lookback_days):
+        if stock_data["Momentum Signal"].iloc[i] == 1:
+            signal_count += 1
+            future_price = stock_data["Adj Close"].iloc[i + lookback_days]
+            current_price = stock_data["Adj Close"].iloc[i]
+            price_change = ((future_price - current_price) / current_price) * 100
+            if price_change >= lookup_yield:
+                win_count += 1
+
+    # Calculate probability of gaining 5% in the next 10 days after a momentum signal
+    probability = win_count / signal_count * 100 if signal_count > 0 else 0
+
+    logger.info(
+        "momentum_analysis: ticker: %s; probability: %s; signal_count: %s; win_count: %s",
+        ticker,
+        str(probability),
+        signal_count,
+        win_count,
+    )
+    # return round(probability, 2)
+    # Return the results as a DataFrame
+    return pd.DataFrame(
+        {
+            "Company code": [ticker],
+            "Signal Count": [signal_count],
+            "Win Count": [win_count],
+            "RSI": [recent_rsi],
+            # "MA_10": [stock_data["MA_10"]],
+            # "MA_50": [stock_data["MA_50"]],
+            # "MACD_Diff": [stock_data["MACD_Diff"]],
+            # "BB_Upper_Band": [stock_data["Upper_Band"]],
+            # "BB_Lower_Band": [stock_data["Lower_Band"]],
+            "Buy Probability": [round(probability, 2)],
+        }
+    )
+
+
+def fetch_momentum_analysis(
+    tickers: list[str], lookback_days: int = 10, lookup_yield: float = 5.0
+):
+    """Fetch stock momenum_analysis data for a list of tickers.
+
+    and returns a DataFrame sorted by trend direction and duration.
+
+    Args:
+    ----
+        tickers (list of str): List of ticker symbols.
+        lookback_days (int): Number of days we look ahead when checking for price gain
+        lookup_yield (int): Yield percent we look for.
+
+    Returns:
+    -------
+        pd.DataFrame: A DataFrame containing the trend direction and duration for each ticker.
+    """
+    # Define a helper function to fetch trend for a single ticker
+    def fetch_momentum_for_ticker(ticker: str) -> pd.DataFrame:
+        return fetch_momentum_analysis_single(ticker, lookback_days, lookup_yield)
+
+    # Use joblib to run fetching in parallel
+    results = Parallel(n_jobs=-1)(
+        delayed(fetch_momentum_for_ticker)(ticker) for ticker in tickers
+    )
+
+    # Combine all individual DataFrame results into one DataFrame
+    if not results:
+        return pd.DataFrame()  # Return empty DataFrame if no results
+
+    result_df = pd.concat(results, ignore_index=True)
+    # remove all columns when Buy Probability == 0
+    result_df = result_df.loc[result_df["Buy Probability"] != 0]
+    # filter out all rows with NaN direction (errored columns)
+    result_df = result_df.sort_values(
+        by=["RSI", "Buy Probability", "Signal Count", "Company code"],
+        ascending=[True, False, False, True],
+    )
+    return result_df.reset_index(drop=True)
+
+
+@cache_to_pickle(Path("/tmp/cache/trends"))  # noqa: S108
 def fetch_chart_trend(ticker: str, days: int = 90, window: int = 30):
     """Get the stock price trend and its duration for the specified ticker over the last N days.
 
@@ -193,7 +413,7 @@ def fetch_chart_trend(ticker: str, days: int = 90, window: int = 30):
     start_date = end_date - timedelta(
         days=days * 2
     )  # fetch more data to ensure enough for moving average calculation
-    data = yf.download(ticker, start=start_date, end=end_date, progress=False)
+    data = yf_download(ticker, start=start_date, end=end_date, progress=False)
 
     if data.empty:
         return pd.DataFrame(
@@ -264,14 +484,13 @@ def fetch_chart_trends(tickers: list[str], days: int = 90, window: int = 30):
     result_df = pd.concat(results, ignore_index=True)
     # filter out all rows with NaN direction (errored columns)
     result_df = result_df.dropna(subset=["Trend Direction", "Trend Duration (days)"])
-    result_df = result_df.drop(columns=["Error"])
     result_df = result_df.sort_values(
         by=["Trend Direction", "Trend Duration (days)"], ascending=[False, False]
     )
     return result_df.reset_index(drop=True)
 
 
-@cache_to_pickle(Path("/tmp/cache"))  # noqa: S108
+@cache_to_pickle(Path("/tmp/cache/volume"))  # noqa: S108
 def fetch_volume_analysis_data(
     ticker: constr(min_length=1), days: NonNegativeInt  # type: ignore
 ) -> pd.DataFrame:
@@ -287,7 +506,7 @@ def fetch_volume_analysis_data(
         pd.DataFrame: DataFrame containing the analysis results.
     """
     # Fetch historical data
-    stock_data = yf.download(ticker, period=f"{days}d", progress=False)
+    stock_data = yf_download(ticker, period=f"{days}d", progress=False)
     if stock_data.empty:
         return pd.DataFrame(
             {"Error": ["No data fetched"]}
@@ -338,5 +557,138 @@ def fetch_volume_analysis_data_multiple_tickers(
     result_df = result_df.sort_values(
         by=["increasing_volume_days", "average_volume", "decreasing_volume_days"],
         ascending=[False, False, False],
+    )
+    return result_df.reset_index(drop=True)
+
+
+@cache_to_pickle(Path("/tmp/cache/macd"))  # noqa: S108
+def fetch_macd_3_day_rule_backtesting_single(
+    ticker: constr(min_length=1), period: str = "1y", amount: int = 5000  # type: ignore
+) -> pd.DataFrame:
+    """Backtesting of MACD-based rule with 3 days of buy."""
+    # Download data
+    data = yf_download(ticker, period=period, progress=False)
+    # Calculate MACD
+    macd = ta.trend.MACD(close=data["Close"])
+    data["MACD"] = macd.macd()
+    data["Signal"] = macd.macd_signal()
+    data["Histogram"] = macd.macd_diff()
+
+    # Generate signals
+    data["Ticker"] = ticker
+    data["Raw_Signal"] = 0
+
+    # Buy signal: 3 consecutive days of negative but growing histogram values
+    buy_condition = (
+        (data["Histogram"] < 0)
+        & (data["Histogram"] > data["Histogram"].shift(1))
+        & (data["Histogram"].shift(1) < 0)
+        & (data["Histogram"].shift(1) > data["Histogram"].shift(2))
+        & (data["Histogram"].shift(2) < 0)
+        & (data["Histogram"].shift(2) > data["Histogram"].shift(3))
+    )
+
+    # Sell signal: 3 consecutive days of declining histogram values (regardless of sign)
+    sell_condition = (
+        (data["Histogram"] < data["Histogram"].shift(1))
+        & (data["Histogram"].shift(1) < data["Histogram"].shift(2))
+        & (data["Histogram"].shift(2) < data["Histogram"].shift(3))
+    )
+
+    data.loc[buy_condition, "Raw_Signal"] = 1
+    data.loc[sell_condition, "Raw_Signal"] = -1
+
+    # Process signals to ensure correct order
+    data["Trade_Signal"] = 0
+    data["Transaction"] = ""
+    data["Shares"] = 0
+    data["Transaction_Price"] = 0
+    data["Transaction_Value"] = 0
+
+    in_position = False
+    shares = 0
+    cash = amount
+
+    for i in range(len(data)):
+        if not in_position and data["Raw_Signal"].iloc[i] == 1 and cash > 0:
+            data.loc[data.index[i], "Trade_Signal"] = 1
+            shares = math.floor(cash / data["Close"].iloc[i])
+            actual_investment = shares * data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction"] = "Buy"
+            data.loc[data.index[i], "Shares"] = shares
+            data.loc[data.index[i], "Transaction_Price"] = data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction_Value"] = actual_investment
+            cash -= actual_investment
+            in_position = True
+        elif in_position and data["Raw_Signal"].iloc[i] == -1:
+            data.loc[data.index[i], "Trade_Signal"] = -1
+            data.loc[data.index[i], "Transaction"] = "Sell"
+            data.loc[data.index[i], "Shares"] = shares
+            data.loc[data.index[i], "Transaction_Price"] = data["Close"].iloc[i]
+            sell_value = shares * data["Close"].iloc[i]
+            data.loc[data.index[i], "Transaction_Value"] = sell_value
+            cash += sell_value
+            shares = 0
+            in_position = False
+
+    # Print transactions
+    transaction_data = data[data["Transaction"] != ""]
+    print("\nTransactions:")
+    print(
+        transaction_data[
+            [
+                "Ticker",
+                "Transaction",
+                "Transaction_Price",
+                "Shares",
+                "Transaction_Value",
+            ]
+        ]
+    )
+
+    # Calculate final value and return
+    final_value = cash
+    if in_position:
+        final_value += shares * data["Close"].iloc[-1]
+
+    cumulative_return = (final_value - amount) / amount
+
+    # Create result dataframe
+    return pd.DataFrame(
+        {
+            "ticker": [ticker],
+            "Cumulative Amount": [final_value],
+            "Cumulative Yield (%)": [cumulative_return * 100],
+        }
+    )
+
+
+def fetch_macd_3_day_rule_backtesting(
+    tickers: List[constr(min_length=1)],  # type: ignore
+    period: str = "1y",
+    amount: int = 5000,
+    n_jobs: int = -1,
+) -> pd.DataFrame:
+    """Perform volume analysis on multiple stock tickers in parallel.
+
+    Args:
+    ----
+        tickers (List[str]): List of stock ticker symbols.
+        days (NonNegativeInt): Number of recent days to analyze for each ticker.
+        n_jobs (int): Number of jobs to run in parallel. Default is -1 (use all processors).
+
+    Returns:
+    -------
+        pd.DataFrame: DataFrame containing the analysis results for all tickers.
+    """
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(fetch_macd_3_day_rule_backtesting_single)(ticker, period, amount)
+        for ticker in tickers
+    )
+    result_df = pd.concat(results, ignore_index=True)
+
+    result_df = result_df.sort_values(
+        by=["Cumulative Amount"],
+        ascending=[False],
     )
     return result_df.reset_index(drop=True)

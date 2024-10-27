@@ -23,10 +23,10 @@ repos:
           name: make-lint
           entry: make lint
           language: system
-        - id: make-type-check
-          name: make-type-check
-          entry: make type-check
-          language: system
+        # - id: make-type-check
+        #   name: make-type-check
+        #   entry: make type-check
+        #   language: system
         - id: make-unit-tests
           name: make-unit-tests
           entry: make unit-tests

@@ -3,7 +3,7 @@
 import pytest
 from click.testing import CliRunner
 
-from stock_market_analysis.cli import (
+from stock_market_analysis.cli.old_cli import (
     version,
 )
 

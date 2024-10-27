@@ -1,6 +1,6 @@
 """Implementation of stock-market-analysis tool."""
 
-from stock_market_analysis.cli import cli
+from stock_market_analysis.cli.cli import cli
 
 
 def main():

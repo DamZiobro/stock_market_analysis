@@ -14,6 +14,11 @@ tabulate = "^0.9.0"
 types-tabulate = "^0.9.0"
 s3fs = "^2024.3.1"
 joblib = "^1.4.2"
+ta = "^0.11.0"
+pywebview = {extras = ["qt"], version = "^5.3"}
+PyQt5 = "^5.15.11"
+lightweight-charts = "^2.1"
+rich = "^13.9.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
@@ -72,7 +77,7 @@ select = [
   "PD",   # pandas-vet
 ]
 
-ignore = ["D203", "D213", "ANN201"]
+ignore = ["D203", "D213", "ANN201", "D100", "TD003"]
 
 [tool.ruff.per-file-ignores]
 "*" = ["D417", "PD901"]

@@ -199,7 +199,11 @@ class BacktestService:
 
                 # initial_purchases - if backtest_amounts contains money, then get from there
                 idx = 0
-                if row["main_advice"] == "buy" and idx < len(self.backtest_amounts):
+                if (
+                    row["main_advice"] == "buy"
+                    and idx < len(self.backtest_amounts)
+                    and self.remaining_cash >= self.min_stock_amount
+                ):
                     # Use the specified amount for the initial purchase
                     self.perform_buy(row, self.backtest_amounts[idx])
                     idx += 1

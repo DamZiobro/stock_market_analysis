@@ -8,18 +8,18 @@ from stock_market_analysis.src.strategies.base import BaseStrategy
 
 Self = TypeVar("Self", bound="RSIOverboughtOversoldStrategy")
 
-DEFAULT_RSI_OVERBOUGHT_THRESHOLD = 70
-DEFAULT_RSI_OVERSOLD_THRESHOLD = 30
+RSI_OVERBOUGHT = 70
+RSI_OVERSOLD = 30
 
 
 def categorize_rsi(
     rsi: float,
     oversold_thresholds: Optional[tuple[int, int]] = (
         0,
-        DEFAULT_RSI_OVERSOLD_THRESHOLD,
+        RSI_OVERSOLD,
     ),
     overbought_thresholds: Optional[tuple[int, int]] = (
-        DEFAULT_RSI_OVERBOUGHT_THRESHOLD,
+        RSI_OVERBOUGHT,
         100,
     ),
 ):
@@ -44,3 +44,30 @@ class RSIOverboughtOversoldStrategy(BaseStrategy):
         data["rsi_advice"] = "neutral"
         data.loc[data["rsi_meaning"] == "oversold", "rsi_advice"] = "buy"
         data.loc[data["rsi_meaning"] == "overbought", "rsi_advice"] = "sell"
+
+
+class RSITrendBasedStrategy(BaseStrategy):
+    """Strategy based on RSI Indicator."""
+
+    def _get_rsi_advice(self: Self, row: pd.Series) -> str:
+        """Generate RSI advice based on trend and RSI thresholds."""
+        if row["trend"] == "uptrend" or row["trend"] == "sideways":
+            if row["rsi"] < RSI_OVERSOLD:
+                # Strong buy signal, closer to -1 as it approaches lower levels
+                return min(1, (RSI_OVERSOLD - row["rsi"]) / RSI_OVERSOLD)
+            if row["rsi"] > RSI_OVERBOUGHT:
+                # Strong sell signal, closer to -1 as it approaches higher levels
+                return max(-1, -(row["rsi"] - RSI_OVERBOUGHT) / (100 - RSI_OVERBOUGHT))
+            return 0  # Neutral region
+
+        if row["trend"] == "downtrend":
+            if row["rsi"] > RSI_OVERSOLD:
+                # Strong sell signal as it nears overbought conditions
+                return max(-1, -(row["rsi"] - RSI_OVERSOLD) / RSI_OVERSOLD)
+            return 0  # Neutral region
+        return None
+
+    def apply(self: Self, data: pd.DataFrame):
+        """Apply RSI strategy to data."""
+        data["rsi"] = rsi(data)
+        data["rsi_advice"] = data.apply(self._get_rsi_advice, axis=1)

@@ -39,3 +39,53 @@ class MovingAverageTrandDirectionStrategy(BaseStrategy):
         data.loc[
             data[f"MA_{short_ma}"] < data[f"MA_{long_ma}"], f"ma_trend_{term}"
         ] = "sell"
+
+
+class MovingAverageGetTrandDirectionStrategy(BaseStrategy):
+    """Base class for all BBOverupperUnderlower-based strategies."""
+
+    def apply(self: Self, data: pd.DataFrame):
+        """Apply strategy to data."""
+        super().apply(data)
+
+        data["ma_short"] = moving_average(data, 20)
+        data["ma_medium"] = moving_average(data, 50)
+        data["ma_long"] = moving_average(data, 200)
+
+        def get_trend(row: pd.Series) -> str:
+            """Get trend based on row value."""
+            if row["ma_short"] > row["ma_medium"] > row["ma_long"]:
+                return "uptrend"
+            if row["ma_short"] < row["ma_medium"] < row["ma_long"]:
+                return "downtrend"
+            return "sideways"
+
+        # Apply the trend determination for each row
+        data["trend"] = data.apply(get_trend, axis=1)
+
+
+class MovingAverageTrendBasedStrategy(BaseStrategy):
+    """Base class for all BBOverupperUnderlower-based strategies."""
+
+    def _get_ma_short_advice(self: Self, row: pd.Series) -> str:
+        """Generate short-term moving average advice based on trend."""
+        ma_diff = row["ma_short"] - row["ma_medium"]
+        if row["trend"] == "uptrend" or row["trend"] == "sideways":
+            # Positive difference indicates a buy signal, scaled by the difference
+            return (
+                min(1, ma_diff / (row["ma_medium"] + 1e-5))
+                if ma_diff > 0
+                else max(-1, ma_diff / (row["ma_medium"] + 1e-5))
+            )
+        if row["trend"] == "downtrend":
+            # Negative difference indicates a sell signal in a downtrend
+            return max(-1, ma_diff / (row["ma_medium"] + 1e-5)) if ma_diff < 0 else 0
+        return None
+
+    def apply(self: Self, data: pd.DataFrame):
+        """Apply strategy to data."""
+        super().apply(data)
+
+        data["ma_short"] = moving_average(data, 20)
+        data["ma_medium"] = moving_average(data, 50)
+        data["ma_short_advice"] = data.apply(self._get_ma_short_advice, axis=1)

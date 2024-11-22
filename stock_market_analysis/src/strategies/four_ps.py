@@ -16,7 +16,7 @@ class Phases4PSDetectionStrategy(BaseStrategy):
     """
 
     def _classify_phase(
-        self: Self, row: pd.Series, prev_phase: str, Wprev_high: float, prev_low: float
+        self: Self, row: pd.Series, prev_phase: str, prev_high: float, prev_low: float
     ) -> str:
         # Check for higher highs and higher lows (uptrend)
         is_higher_high = row["Close"] > prev_high

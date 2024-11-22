@@ -55,11 +55,67 @@ def bb_lower(df: pd.DataFrame) -> pd.Series:
         close=df["Close"], window=20, window_dev=2
     ).bollinger_lband()
 
+
 def moving_average(df: pd.DataFrame, window: int) -> pd.Series:
     """Calculate moving average data."""
     ticker = df["Ticker"].iloc[0]
     logger.info("Calculating Moving Average for: %s with window: %d", ticker, window)
     return df["Close"].rolling(window=window).mean()
+
+
+def volume_ma(df: pd.DataFrame, window: int) -> pd.Series:
+    """Calculate moving average data."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating Moving Average for: %s with window: %d", ticker, window)
+    return df["Volume"].rolling(window=window).mean()
+
+
+def ma_20(df: pd.DataFrame) -> pd.Series:
+    """Calculate moving_average with window=20."""
+    return moving_average(df, window=20)
+
+
+def ma_50(df: pd.DataFrame) -> pd.Series:
+    """Calculate moving_average with window=50."""
+    return moving_average(df, window=50)
+
+
+def ma_200(df: pd.DataFrame) -> pd.Series:
+    """Calculate moving_average with window=200."""
+    return moving_average(df, window=200)
+
+
+def ma_20_slope(df: pd.DataFrame) -> pd.Series:
+    """Calculate slope moving_average with window=20."""
+    return df["ma_20"].diff()
+
+
+def ma_50_slope(df: pd.DataFrame) -> pd.Series:
+    """Calculate slope moving_average with window=20."""
+    return df["ma_50"].diff()
+
+
+def ma_200_slope(df: pd.DataFrame) -> pd.Series:
+    """Calculate slope moving_average with window=20."""
+    return df["ma_200"].diff()
+
+
+def volume_ma_20(df: pd.DataFrame) -> pd.Series:
+    """Calculate volume moving_average with window=20."""
+    return volume_ma(df, window=20)
+
+
+def momentum(df: pd.DataFrame, window: int) -> pd.Series:
+    """Calculate momentum (percentage price change over last 10 days)."""
+    ticker = df["Ticker"].iloc[0]
+    logger.info("Calculating momentum for: %s with window: %d", ticker, window)
+    return df["Close"].pct_change(periods=window)
+
+
+def momentum_10(df: pd.DataFrame) -> pd.Series:
+    """Calculate momentum (percentage price change over last 10 days)."""
+    return momentum(df, window=10)
+
 
 class TechnicalIndicators:
     """Applies selected technical indicators on stock data."""

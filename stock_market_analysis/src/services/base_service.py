@@ -23,7 +23,7 @@ class BaseAnalysisService:
 
     indicator_service = TechnicalIndicators()
     data_provider = None  # must be overwritten in concrete classes
-    selected_indicators: ClassVar = []  # could be overwritten in concrete classes
+    technical_indicators: ClassVar = []  # could be overwritten in concrete classes
     pre_run_strategies: ClassVar = []  # could be overwritten in concrete classes
     post_run_analysis_list: ClassVar = (
         []
@@ -49,7 +49,7 @@ class BaseAnalysisService:
 
         # Apply technical indicators
         data_df = self.indicator_service.add_indicators(
-            data_df, self.selected_indicators  # type: ignore
+            data_df, self.technical_indicators  # type: ignore
         )
 
         # Apply strategies

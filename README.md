@@ -89,3 +89,7 @@ make pre-commit
 * **make run** - run the CLI app from locally installed virtualenv
 * **make install** - install the CLI app into the system global path
 * **make clean** - clean full project's virtualenv and dependencies
+
+### Data
+
+CSV data files from 'data' directory are prepared based on the data from this page: https://www.stockchallenge.co.uk/ftse.php

@@ -1,3 +1,4 @@
+import copy
 from typing import TYPE_CHECKING, List, Optional, TypeVar
 
 import pandas as pd
@@ -193,9 +194,10 @@ class BacktestService:
                     ):
                         # sell because of stop / loss
                         if row_close_price:
-                            row["Close"] = row_close_price
-                            row["main_advice"] = "sell"  # to avoid buy below
-                        self.perform_sell(row, holding, "_stop_loss")
+                            row_copy = copy.deepcopy(row)
+                            row_copy["Close"] = row_close_price
+                            row_copy["main_advice"] = "sell"  # to avoid buy below
+                        self.perform_sell(row_copy, holding, "_stop_loss")
 
                 # initial_purchases - if backtest_amounts contains money, then get from there
                 idx = 0

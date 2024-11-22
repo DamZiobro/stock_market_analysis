@@ -15,7 +15,7 @@ class MainAdviceScoreStrategy(BaseStrategy):
         """Calculate the main advice based on weighted indicator."""
         weights = self.kwargs["advice_weights"]
         buy_score_threshold = self.kwargs["buy_score_threshold"]
-        sell_score_threshold = self.kwargs["buy_score_threshold"]
+        sell_score_threshold = self.kwargs["sell_score_threshold"]
         # Compute weighted score for each row based on provided weights
         data["main_advice_score"] = sum(
             weight * data[column] for column, weight in weights.items()
@@ -26,7 +26,7 @@ class MainAdviceScoreStrategy(BaseStrategy):
             lambda score: "buy"
             if score > buy_score_threshold
             else "sell"
-            if score < -sell_score_threshold
+            if score < sell_score_threshold
             else "hold"
         )
 

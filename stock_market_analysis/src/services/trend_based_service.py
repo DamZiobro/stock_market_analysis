@@ -5,7 +5,7 @@ from stock_market_analysis.src.analysis.sorting import SortBy
 from stock_market_analysis.src.data_providers.yahoo_data import YahooDataProvider
 from stock_market_analysis.src.services.base_service import BaseAnalysisService
 from stock_market_analysis.src.strategies.ma import (
-    MovingAverageGetTrandDirectionStrategy,
+    MovingAverageMomentumMACDTrandDirectionStrategy,
     MovingAverageTrendBasedStrategy,
 )
 from stock_market_analysis.src.strategies.macd import MACDTrendBasedAdviceStrategy
@@ -19,7 +19,7 @@ Self = TypeVar("Self", bound="TrendBasedService")
 class TrendBasedService(BaseAnalysisService):
     """Facade service for stock market analysis.
 
-    Backtested 1 year from 30.10.2024 this strategy gave 20% gain
+    Backtested 1 year from 08.11.2024 this strategy gave 30% gain
     """
 
     data_provider: ClassVar = YahooDataProvider()  # type: ignore
@@ -32,13 +32,13 @@ class TrendBasedService(BaseAnalysisService):
         "ma_long",
     ]
     pre_run_strategies: ClassVar = [
-        MovingAverageGetTrandDirectionStrategy(),
+        MovingAverageMomentumMACDTrandDirectionStrategy(),
         MACDTrendBasedAdviceStrategy(),
         RSITrendBasedStrategy(),
         MovingAverageTrendBasedStrategy(),
         MainAdviceScoreStrategy(
-            buy_score_threshold=0.3,
-            score_score_threshold=-0.3,
+            buy_score_threshold=0.4,
+            sell_score_threshold=-0.4,
             advice_weights={
                 "rsi_advice": 0.3,
                 "macd_advice": 0.4,

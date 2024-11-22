@@ -13,6 +13,7 @@ from stock_market_analysis.src.backtest.backtest_service import BacktestService
 from stock_market_analysis.src.logger import logger
 from stock_market_analysis.src.services.bb_rsi_service import BBAndRSIAndMAService
 from stock_market_analysis.src.services.bb_service import BBBaseService
+from stock_market_analysis.src.services.four_ps_service import FourPSService
 from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
 from stock_market_analysis.src.services.macd_service import MACDBaseService
 from stock_market_analysis.src.services.rsi_service import RSIBaseService
@@ -122,6 +123,8 @@ def analyze(  # noqa: PLR0913, PLR0915
         service_obj = BBAndRSIAndMAService()  # type: ignore
     elif service == "TrendBased":
         service_obj = TrendBasedService()  # type: ignore
+    elif service == "FourPS":
+        service_obj = FourPSService()  # type: ignore
     else:
         msg = f"Unsupported service: {service}"
         raise ValueError(msg)

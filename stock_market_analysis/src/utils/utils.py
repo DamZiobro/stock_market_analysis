@@ -86,7 +86,8 @@ def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
     logger.info(
         "Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs
     )
-    return yf.download(*args, **kwargs)
+    df = yf.download(*args, **kwargs)
+    return df
 
 
 def parse_sort_input(input_string: str | None) -> tuple[list[str], list[bool]]:

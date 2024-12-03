@@ -214,7 +214,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "coverage"
-version = "7.6.4"
+version = "7.6.8"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -669,11 +669,11 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "numpy"
-version = "1.26.4"
+version = "2.1.3"
 description = "Fundamental package for array computing in Python"
 category = "main"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 
 [[package]]
 name = "packaging"
@@ -1170,6 +1170,22 @@ awscli = ["aiobotocore[awscli] (>=2.5.4,<3.0.0)"]
 boto3 = ["aiobotocore[boto3] (>=2.5.4,<3.0.0)"]
 
 [[package]]
+name = "scipy"
+version = "1.14.1"
+description = "Fundamental algorithms for scientific computing in Python"
+category = "main"
+optional = false
+python-versions = ">=3.10"
+
+[package.dependencies]
+numpy = ">=1.23.5,<2.3"
+
+[package.extras]
+test = ["pytest", "pytest-cov", "pytest-timeout", "pytest-xdist", "asv", "mpmath", "gmpy2", "threadpoolctl", "scikit-umfpack", "pooch", "hypothesis (>=6.30)", "array-api-strict (>=2.0)", "cython", "meson", "ninja"]
+doc = ["sphinx (>=5.0.0,<=7.3.7)", "pydata-sphinx-theme (>=0.15.2)", "sphinx-design (>=0.4.0)", "matplotlib (>=3.5)", "numpydoc", "jupytext", "myst-nb", "pooch", "jupyterlite-sphinx (>=0.13.1)", "jupyterlite-pyodide-kernel"]
+dev = ["mypy (==1.10.0)", "typing-extensions", "types-psutil", "pycodestyle", "ruff (>=0.0.292)", "cython-lint (>=0.12.2)", "rich-click", "doit (>=0.36.0)", "pydevtool"]
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -1329,7 +1345,7 @@ repair = ["scipy (>=1.6.3)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "34c88ae313176dec4ad860e7b4790994ad18950fbd377db589be8cb47725bdb1"
+content-hash = "144c262050f1262c71dc933cc35582226fe33da1cafcaa56aeeb7273de581e8f"
 
 [metadata.files]
 aiobotocore = []
@@ -1427,6 +1443,7 @@ requests = []
 rich = []
 ruff = []
 s3fs = []
+scipy = []
 six = []
 soupsieve = []
 ta = []

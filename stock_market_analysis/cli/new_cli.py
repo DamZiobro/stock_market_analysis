@@ -17,6 +17,7 @@ from stock_market_analysis.src.services.four_ps_service import FourPSService
 from stock_market_analysis.src.services.macd_rsi_service import MACD3DaysRSIService
 from stock_market_analysis.src.services.macd_service import MACDBaseService
 from stock_market_analysis.src.services.rsi_service import RSIBaseService
+from stock_market_analysis.src.services.sup_res_service import SupportResistanceService
 from stock_market_analysis.src.services.trend_based_service import TrendBasedService
 from stock_market_analysis.src.utils.utils import parse_filters_input, parse_sort_input
 
@@ -125,6 +126,8 @@ def analyze(  # noqa: PLR0913, PLR0915
         service_obj = TrendBasedService()  # type: ignore
     elif service == "FourPS":
         service_obj = FourPSService()  # type: ignore
+    elif service == "SupportResistance":
+        service_obj = SupportResistanceService()  # type: ignore
     else:
         msg = f"Unsupported service: {service}"
         raise ValueError(msg)

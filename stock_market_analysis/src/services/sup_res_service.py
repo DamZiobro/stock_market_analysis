@@ -24,7 +24,7 @@ class SupportResistanceService(BaseAnalysisService):
             columns=[
                 "Date",
                 "sup_res_advice",
-                "sup_res_score",
+                "sup_res_window",
                 "Stock_Index",
                 "Ticker",
             ],

@@ -37,6 +37,7 @@ def yf_download(ticker: str, period: str) -> pd.DataFrame:
     else:
         data = yf.download(ticker, period=period, progress=False)
 
+    data.columns = data.columns.get_level_values(0)
     return data
 
 

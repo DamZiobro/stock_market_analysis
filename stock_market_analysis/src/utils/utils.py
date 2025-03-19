@@ -87,6 +87,7 @@ def yf_download(*args: Any, **kwargs: Any):  # noqa: ANN401
         "Downloading Yahoo Finance data for: args=(%s); kwargs=(%s)", args, kwargs
     )
     df = yf.download(*args, **kwargs)
+    df.columns = df.columns.get_level_values(0)
     return df
 
 

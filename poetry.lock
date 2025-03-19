@@ -63,14 +63,6 @@ optional = false
 python-versions = ">=3.8"
 
 [[package]]
-name = "appdirs"
-version = "1.4.4"
-description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "async-timeout"
 version = "4.0.3"
 description = "Timeout context manager for asyncio programs"
@@ -214,7 +206,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7
 
 [[package]]
 name = "coverage"
-version = "7.6.8"
+version = "7.7.0"
 description = "Code coverage measurement for Python"
 category = "dev"
 optional = false
@@ -326,24 +318,6 @@ python-versions = ">=3.8"
 colorama = ">=0.4"
 
 [[package]]
-name = "html5lib"
-version = "1.1"
-description = "HTML parser based on the WHATWG HTML specification"
-category = "main"
-optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
-
-[package.dependencies]
-six = ">=1.9"
-webencodings = "*"
-
-[package.extras]
-all = ["genshi", "chardet (>=2.2)", "lxml"]
-chardet = ["chardet (>=2.2)"]
-genshi = ["genshi"]
-lxml = ["lxml"]
-
-[[package]]
 name = "idna"
 version = "3.7"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -400,21 +374,6 @@ python-versions = ">=3.8"
 [package.dependencies]
 pandas = "*"
 pywebview = ">=5.0.5"
-
-[[package]]
-name = "lxml"
-version = "5.2.1"
-description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.extras]
-cssselect = ["cssselect (>=0.7)"]
-html5 = ["html5lib"]
-html-clean = ["lxml-html-clean"]
-htmlsoup = ["beautifulsoup4"]
-source = ["Cython (>=3.0.10)"]
 
 [[package]]
 name = "markdown"
@@ -754,7 +713,7 @@ python-versions = "*"
 name = "platformdirs"
 version = "4.2.1"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 
@@ -1290,14 +1249,6 @@ python-versions = ">=3.8"
 watchmedo = ["PyYAML (>=3.10)"]
 
 [[package]]
-name = "webencodings"
-version = "0.5.1"
-description = "Character encoding aliases for legacy web content"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "wrapt"
 version = "1.16.0"
 description = "Module for decorators, wrappers and monkey patching."
@@ -1319,27 +1270,25 @@ multidict = ">=4.0"
 
 [[package]]
 name = "yfinance"
-version = "0.2.38"
+version = "0.2.54"
 description = "Download market data from Yahoo! Finance API"
 category = "main"
 optional = false
 python-versions = "*"
 
 [package.dependencies]
-appdirs = ">=1.4.4"
 beautifulsoup4 = ">=4.11.1"
 frozendict = ">=2.3.4"
-html5lib = ">=1.1"
-lxml = ">=4.9.1"
 multitasking = ">=0.0.7"
 numpy = ">=1.16.5"
 pandas = ">=1.3.0"
 peewee = ">=3.16.2"
+platformdirs = ">=2.0.0"
 pytz = ">=2022.5"
 requests = ">=2.31"
 
 [package.extras]
-nospam = ["requests-cache (>=1.0)", "requests-ratelimiter (>=0.3.1)"]
+nospam = ["requests_cache (>=1.0)", "requests_ratelimiter (>=0.3.1)"]
 repair = ["scipy (>=1.6.3)"]
 
 [metadata]
@@ -1353,7 +1302,6 @@ aiohttp = []
 aioitertools = []
 aiosignal = []
 annotated-types = []
-appdirs = []
 async-timeout = []
 atomicwrites = []
 attrs = []
@@ -1375,14 +1323,12 @@ frozenlist = []
 fsspec = []
 ghp-import = []
 griffe = []
-html5lib = []
 idna = []
 iniconfig = []
 jinja2 = []
 jmespath = []
 joblib = []
 lightweight-charts = []
-lxml = []
 markdown = []
 markdown-it-py = []
 markupsafe = []
@@ -1455,7 +1401,6 @@ typing-extensions = []
 tzdata = []
 urllib3 = []
 watchdog = []
-webencodings = []
 wrapt = []
 yarl = []
 yfinance = []
